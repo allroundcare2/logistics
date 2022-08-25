@@ -12,7 +12,7 @@
             handleNotification('checking details', window, 'info', 'loading...');
             loading = true;
             try {
-              const loginResp = await  (await axios.post(`${url}accounts/login`, user)).data;
+              const loginResp = await  (await axios.post(`${url}/accounts/login`, user)).data;
               if(loginResp.type == 'success'){
                 loading = false;
                 if(loginResp.body.type == EuserType.DRIVER) {

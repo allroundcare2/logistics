@@ -24,7 +24,7 @@ import { getUrl } from "../../functions/clientAuth";
             vehicle.driver_id = user.id;
             console.log(vehicle);
             const resp = await (
-                await axios.post(`${url}accounts/vehicle`, vehicle)
+                await axios.post(`${url}/accounts/vehicle`, vehicle)
             ).data;
             if (resp) {
                 let myResp = await Swal.fire({

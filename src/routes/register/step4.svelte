@@ -24,7 +24,7 @@ import { getUrl } from "../../functions/clientAuth";
         try {
             driver.driver_id = user.id;
             const driverResp = await (
-                await axios.put(`${url}accounts/update_bank`, driver)
+                await axios.put(`${url}/accounts/update_bank`, driver)
             ).data;
             if (driverResp) {
                 const resp = await Swal.fire({

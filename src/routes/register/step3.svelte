@@ -49,7 +49,7 @@ import { getUrl } from "../../functions/clientAuth";
        form.append('issue_date', issue_date);
        form.append('driver_id', user.id);
        try {
-       const driverResp = await axios.put(`${url}accounts/driver_id`, form);
+       const driverResp = await axios.put(`${url}/accounts/driver_id`, form);
        if(driverResp){
         let myResp = await Swal.fire({
                     title: `User information has been added `,

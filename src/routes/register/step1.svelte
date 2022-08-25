@@ -23,7 +23,7 @@
             driver.type = EuserType.DRIVER;
             console.log(url);
             const axiosData = await axios.post(
-                `${url}accounts/register`,
+                `${url}/accounts/register`,
                 driver
             );
             if (axiosData.data.msg == "success") {

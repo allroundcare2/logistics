@@ -1,0 +1,22 @@
+{
+	"background_color": "#ffffff",
+	"theme_color": "#333333",
+	"name": "ARC-logistics",
+	"short_name": "ARC-L",
+	"display": "minimal-ui",
+	"start_url": "/",
+	"icons": [
+		{
+			"src": "logo/arc192.png",
+			"sizes": "192x192",
+			"type": "image/png",
+			"purpose": "any maskable"
+		},
+		{
+			"src": "logo/arc512.png",
+			"sizes": "512x512",
+			"type": "image/png",
+			"purpose": "any maskable"
+		}
+	]
+}

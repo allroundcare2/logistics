@@ -18,5 +18,5 @@ export function registration_status(){
 }
 
 export function  getUrl(){
-   return location.hostname == 'localhost'? 'http://localhost:4000' : 'http://api.allroundcare.ng';
+   return location.hostname == 'localhost'? 'http://localhost:4000' : 'https://api.allroundcare.ng';
 }

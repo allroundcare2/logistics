@@ -1,24 +1,62 @@
-<script>
+<script lang="ts">
     import { onMount } from "svelte";
 
     import Sidebar from "../../components/Sidebar.svelte";
 
     let map;
-    onMount(() => {
-        map = L.map("map", {
-            center: [6.465422, 3.406448],
-            zoom: 13,
+    let win: any;
+    let myIcon: any = {};
+    const getLocation = (): Promise<any> => {
+       
+       return new Promise((resolve, reject)=>{
+           if (navigator.geolocation) {
+           navigator.geolocation.getCurrentPosition((position) => {
+               resolve({
+                   latitude: position.coords.latitude,
+                   longitude: position.coords.longitude,
+               })
+               
+           });
+       } else {
+           handleNotification(
+               "oops could not get your location",
+               window,
+               "error",
+               "oops!!!"
+           );
+           return reject(false);
+       }
+       })
+      
+   };
+ 
+    onMount( async () => {
+        win = window;
+     myIcon = win.L.icon({
+    iconUrl: 'leaflet/images/rider.svg',
+    iconSize: [38, 95],
+    iconAnchor: [22, 94],
+    popupAnchor: [-3, -76],
+    shadowUrl: 'leaflet/images/marker-shadow.png',
+    shadowSize: [68, 95],
+    shadowAnchor: [22, 94]
+});
+        const location = await getLocation();
+        if(location) {
+            map = win.L.map("map", {
+            center: [location.latitude, location.longitude],
+            zoom: 17,
         });
-        L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        win.L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
             attribution:
                 '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
         }).addTo(map);
+        win.L.marker([location.latitude, location.longitude], {icon:myIcon}).addTo(map);
+        }
+       
     });
 </script>
-<svelte:head>
-    <link rel="stylesheet" href="leaflet/leaflet.css">
-    <script defer src="leaflet/leaflet.js"></script>
-</svelte:head>
+
 <main>
     <nav class="row fixed-top"  style="background-color: transparent; z-index:2000">
         <div class="col-10">

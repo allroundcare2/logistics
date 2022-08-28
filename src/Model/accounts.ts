@@ -52,10 +52,11 @@ export interface Iprice {
     publicId?: string;
     prices: Iprice[];
   }
-export enum EorderStatus {
+  export enum EorderStatus {
     CREATED = "created",
     APPROVED = 'approved',
-    DELIVERY = 'ready for delivery'
+    DELIVERY = 'ready for delivery',
+    DISPATCHER_ACCEPT = 'accepted by dispatch rider'
 }
 export interface IorderStatus {
     name?: EorderStatus,

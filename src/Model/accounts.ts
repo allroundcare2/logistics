@@ -56,7 +56,9 @@ export interface Iprice {
     CREATED = "created",
     APPROVED = 'approved',
     DELIVERY = 'ready for delivery',
-    DISPATCHER_ACCEPT = 'accepted by dispatch rider'
+    DISPATCHER_ACCEPT = 'accepted by dispatch rider',
+    GOTO_SHOPPER = 'go to shopper',
+    GOTO_RETAILER = 'go to retailer'
 }
 export interface IorderStatus {
     name?: EorderStatus,
@@ -70,6 +72,8 @@ export interface Iorder {
     _id?: any;
     dispatcher_id?: number;
     shopper_id?: number;
+    shopper?: Iuser;
+    retailer?: Iuser;
     admin_id?: number;
     shopper_address?: string;
     current_status?: string;

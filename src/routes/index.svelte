@@ -36,27 +36,27 @@
             </div>
         </div>
         <div class="col-12 col-sm-6 col-md-3">
-            <div class="card card-body bg-primary text-white mb-1 mr-1 mt-0 mb-0">
+            <div class="card card-body bg-secondary text-white mb-1 mr-1 mt-0 mb-0">
                 <div class="row">
                     <div class="col-3">
 
                     </div>
                     <div class="col-9">
-                        <p class="main-txt mb-0"><strong>₦3,000</strong></p>
-                        <p class="mb-0"><small>wallet balance</small></p>
+                        <p class="main-txt mb-0"><strong>1</strong></p>
+                        <p class="mb-0"><small>Total Orders</small></p>
                     </div>
                 </div>
             </div>
         </div>
         <div class="col-12 col-sm-6 col-md-3">
-            <div class="card card-body bg-primary text-white mb-1 mr-1 mt-0 mb-0">
+            <div class="card card-body bg-danger text-white mb-1 mr-1 mt-0 mb-0">
                 <div class="row">
                     <div class="col-3">
 
                     </div>
                     <div class="col-9">
-                        <p class="main-txt mb-0"><strong>₦3,000</strong></p>
-                        <p class="mb-0"><small>wallet balance</small></p>
+                        <p class="main-txt mb-0"><strong>0</strong></p>
+                        <p class="mb-0"><small>Cancelled Order</small></p>
                     </div>
                 </div>
             </div>

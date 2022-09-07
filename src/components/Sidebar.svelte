@@ -11,6 +11,10 @@ import {goto} from '@sapper/app';
     const nav =(screen: string)=>{
       goto(screen)
     }
+    const logout = ()=>{
+      localStorage.clear();
+      goto('landing')
+    }
     onMount(()=>{
         win = window;
         console.log(win);
@@ -58,7 +62,7 @@ import {goto} from '@sapper/app';
         <div class="col-2"><span class="fa fa-exclamation"></span></div>
         <div class="col-8"><strong>About</strong></div>
       </div>
-      <div class="row">
+      <div on:click="{logout}" class="row">
         <div class="col-2"><span class="fa fa-sign-out"></span></div>
         <div class="col-8"><strong>Logout</strong></div>
       </div>

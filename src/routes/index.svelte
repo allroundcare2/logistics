@@ -1,16 +1,41 @@
 <script lang="ts">
     import Sidebar from "../components/Sidebar.svelte";
     import { onMount } from "svelte";
-    import { checkForSession } from "../functions/clientAuth";
+    import { checkForSession, getUrl } from "../functions/clientAuth";
     import { goto } from "@sapper/app";
+    import { handleNotification } from "../functions/clientNot";
+    import axios from "axios";
     let session_user: any = {};
-    onMount(() => {
+    let dashboard = {wallet: 0.00, totalOrders: 0};
+    let url = '';
+    onMount(async () => {
+        url = getUrl();
          session_user = checkForSession(goto);
          console.log(session_user);
+         handleNotification('loading dashboard details', window,'info', 'loading...');
+      try {
+        const result = await axios.get(url + '/drivers/dashboard', {
+                        headers: {
+                            Authorization: "Bearer " + session_user.token,
+                        },
+                    });
+        if(result){
+            handleNotification('dashboard details loaded successfully', window, 'success','ok');
+            dashboard.wallet = result.data[0].wallet;
+            dashboard.totalOrders = result.data[1];
+        }
+      } catch (error) {
+        handleNotification('recent data didnt load successfully', window, 'error','error');
+      }
+
+        
     });
 </script>
+<svelte:head>
+    <title>ARC :: logistics dashboard</title>
+</svelte:head>
 {#if session_user}
-    
+  
 <main>
     <div class="container">
         <nav class="row " style="background-color: transparent">
@@ -29,7 +54,7 @@
 
                     </div>
                     <div class="col-9">
-                        <p class="main-txt mb-0"><strong>₦3,000</strong></p>
+                        <p class="main-txt mb-0"><strong>₦{dashboard.wallet}</strong></p>
                         <p class="mb-0"><small>wallet balance</small></p>
                     </div>
                 </div>
@@ -42,7 +67,7 @@
 
                     </div>
                     <div class="col-9">
-                        <p class="main-txt mb-0"><strong>1</strong></p>
+                        <p class="main-txt mb-0"><strong>{dashboard.totalOrders}</strong></p>
                         <p class="mb-0"><small>Total Orders</small></p>
                     </div>
                 </div>

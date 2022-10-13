@@ -1,3 +1,16 @@
+<script context="module">
+	// the (optional) preload function takes a
+	// `{ path, params, query }` object and turns it into
+	// the data we need to render the page
+	export async function preload(page, session) {
+		// the `slug` parameter is available because this file
+		// is called [slug].svelte
+		const { id } = page.query;
+;
+
+		return { id };
+	}
+</script>
 <script lang="ts">
     import axios from "axios";
 
@@ -13,6 +26,7 @@
     import { EorderStatus, Ilocation, Iorder } from "../../Model/accounts";
     import { goto } from "@sapper/app";
 import Swal from "sweetalert2";
+export let id;
     let url = "";
     let watchID: any = 0;
     let map;
@@ -49,6 +63,9 @@ import Swal from "sweetalert2";
             }
         });
     };
+    const endOrder =()=>{
+        goto(`orders/complete-order?id=${order._id}`)
+    }
     const gotoShopper = async () => {
         loading = true;
         handleNotification("updating movement", window, "info", "updating...");
@@ -100,7 +117,7 @@ import Swal from "sweetalert2";
                     "success",
                     "ok"
                 );
-                
+                console.log(orderResp);
                
                 order.current_status = EorderStatus.GOTO_RETAILER;
                
@@ -117,9 +134,10 @@ import Swal from "sweetalert2";
                     ).addTo(map);
             }
         } catch (error) {
+            loading = false;
             console.error(error);
             handleNotification('oops!!! order was not updated successfully', window, 'error','oops!!!');
-            loading = false;
+            
         }
     };
 
@@ -155,9 +173,8 @@ import Swal from "sweetalert2";
         win = window;
         url = getUrl();
         user = checkForSession(goto);
-        let temp = JSON.parse(localStorage.getItem("arc_active_order"));
-        temp.shopper = {};
-        order = temp;
+      //  let temp = JSON.parse(localStorage.getItem("arc_active_order"));
+     
         driverIcon = win.L.icon({
             iconUrl: "leaflet/images/rider.svg",
             iconSize: [28, 83],
@@ -185,7 +202,7 @@ import Swal from "sweetalert2";
             );
 
             const orderResp = await axios.get(
-                `${url}/order/get_single_order?id=${order._id}`,
+                `${url}/order/get_single_order?id=${id}`,
                 {
                     headers: {
                         Authorization: "Bearer " + user.token,
@@ -194,18 +211,14 @@ import Swal from "sweetalert2";
             );
             if (orderResp) {
                 handleNotification(
-                    "order has been updated",
+                    "order has been retrieved",
                     window,
                     "success",
                     "ok"
                 );
                 loading = true;
 
-                let tempOrder: any = {};
-                tempOrder = (await orderResp).data.promiseResult;
-                tempOrder.shopper = (await orderResp).data.shopper;
-                tempOrder.retailer = (await orderResp).data.retailer;
-                order = tempOrder;
+                order = orderResp.data;
                 console.log(order);
 
                 localStorage.setItem("arc_active_order", JSON.stringify(order));
@@ -492,12 +505,12 @@ import Swal from "sweetalert2";
 
             <div class="mt-3">
                {#if loading}
-               <button on:click="{gotoRetailer}" style="width: 100%;" class="btn btn-block btn-success"
+               <button on:click="{endOrder}" style="width: 100%;" class="btn btn-block btn-success"
                >Complete Delivery</button
            >
                {:else}
                <button disabled style="width: 100%;" class="btn btn-block btn-success"
-                    >Completing Delivery...</button
+                    >completing Delivery...</button
                 >
                {/if}
             </div>

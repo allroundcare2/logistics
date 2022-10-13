@@ -42,6 +42,7 @@ export interface Iprice {
     price_name?: string;
     amount?: number;
     quantity?: number;
+  size?: number; //kg
   }
   export interface Iproduct {
     _id?: any;
@@ -58,11 +59,14 @@ export interface Iprice {
     DELIVERY = 'ready for delivery',
     DISPATCHER_ACCEPT = 'accepted by dispatch rider',
     GOTO_SHOPPER = 'go to shopper',
-    GOTO_RETAILER = 'go to retailer'
+    GOTO_RETAILER = 'go to retailer',
+    COMPLETED = 'completed',
+    DECLINED = 'declined'
 }
 export interface IorderStatus {
     name?: EorderStatus,
-    addedDate?: Date
+    addedDate?: Date,
+    reason?: string;
 }
 export interface Ilocation {
     latitude: number;

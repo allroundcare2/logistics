@@ -1,3 +1,5 @@
+
+
 <script lang="ts">
     import axios from "axios";
 
@@ -6,9 +8,10 @@
     import Nav from "../../components/Nav.svelte";
     import { checkForSession, getUrl } from "../../functions/clientAuth";
     import { goto } from "@sapper/app";
-    import type { Iorder } from "../../Model/accounts";
+    import { EorderStatus, Iorder } from "../../Model/accounts";
     import { handleNotification } from "../../functions/clientNot";
     import Swal from "sweetalert2";
+    import Delivery from "./delivery.svelte";
     const db = new zango.Db("arc_db", 1, { orders: ["_id"] });
 
     const orders_collections = db.collection("orders");
@@ -17,6 +20,7 @@
     let url = "";
     let orders: Iorder[] = [];
     let dispatcherOrders: Iorder[] = [];
+    let closedOrders: Iorder[] = [];
     let tab = "confirm";
     const getLocation = () => {
         return new Promise((resolve, reject) => {
@@ -56,7 +60,7 @@
                 order.dispatcher_id = orderResp.data.id;
                 order.current_status = orderResp.data.current_status;
                 order.status.push(orderResp.data.status);
-                db.open();
+            
 
                 let data = await Swal.fire({
                     icon: "success",
@@ -64,10 +68,7 @@
                     text: "success",
                 });
 
-                orders_collections.insert(order).then(() => {
-                    db.close();
-                    goto("orders/delivery");
-                });
+              goto(`orders/delivery?id=${order._id}`)
             }
         } catch (error) {
             Swal.fire({
@@ -80,8 +81,14 @@
 
     const continueRide = async (order: Iorder) => {
         localStorage.setItem("arc_active_order", JSON.stringify(order));
-        goto("orders/delivery");
+        goto("orders/delivery?id=" + order._id);
     };
+    const makePayment = (order: Iorder)=>{
+        goto('orders/delivery-reciept?id=' + order._id);
+    }
+    const view = (order: Iorder)=>{
+
+}
     onMount(async () => {
         try {
             user = checkForSession(goto);
@@ -90,20 +97,6 @@
             const location = await getLocation();
             console.log(location);
 
-            if (location) {
-                const ordersResp = await axios.put(
-                    `${url}/order/dispatcher_order`,
-                    location,
-                    {
-                        headers: {
-                            Authorization: "Bearer " + user.token,
-                        },
-                    }
-                );
-                orders = ordersResp.data;
-                console.log(orders);
-            } else {
-            }
             const orderResp = await axios.get(
                 `${url}/order/retrieve_dispatcher_orders`,
                 {
@@ -120,6 +113,19 @@
                     "ok"
                 );
                 dispatcherOrders = orderResp.data;
+                dispatcherOrders.forEach((order,i)=>{
+                    console.log(order.current_status,EorderStatus.COMPLETED );
+                   console.log(order.current_status == EorderStatus.COMPLETED);
+                    if(order.current_status == 'completed' ||
+                     order.current_status == 'declined') {
+                        console.log(order);
+                        closedOrders.push(order);
+                        dispatcherOrders.splice(i,1);
+                    }
+                });
+                dispatcherOrders = dispatcherOrders;
+                closedOrders = closedOrders;
+              
             }
         } catch (error) {
             console.log(error);
@@ -232,7 +238,7 @@
             {:else}
                 no order here
             {/each}
-        {:else}
+        {:else if tab == 'pickup'}
             {#each dispatcherOrders as order}
                 <div class="row">
                     <div class="col-12">
@@ -282,9 +288,77 @@
                         </div>
                     </div>
                 </div>
+
+            
             {:else}
                 no order here
             {/each}
+
+            {:else if tab == 'delivery'}
+            {#each closedOrders as order}
+            <div class="row">
+                <div class="col-12">
+                    <div class="card card-body">
+                        <div class="row pt-0">
+                            <div class="col-8 pt-0 mt-0">
+                                <span class="order-name">Order 311 </span>
+                            </div>
+                            <div class="col-4 text-end ">
+                                <p class="amount">₦300</p>
+                            </div>
+                        </div>
+                        <div class="row mt-0">
+                            <div class="col-9">
+                                <div class="row">
+                                    <div class="col-1">
+                                        <span class="order-status" />
+                                    </div>
+                                    <div class="col-10 pt-0">
+                                        <span class="order-description "
+                                            >{order.shopper_address}</span
+                                        >
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-1">
+                                        <span class="order-status" />
+                                    </div>
+                                    <div class="col-10 pt-0">
+                                        <span class="order-description "
+                                            >{order.retailer_address}</span
+                                        >
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-3">
+                              {#if order.current_status == 'completed'}
+                              <button
+                              on:click={() => {
+                                  makePayment(order);
+                              }}
+                              class="btn btn-outline btn-sm btn-success"
+                              >Pay</button
+                          >
+                              {:else}
+                              <button
+                              on:click={() => {
+                                  view(order);
+                              }}
+                              class="btn btn-outline btn-sm btn-success"
+                              >View Order</button
+                          >
+                              {/if}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        
+        {:else}
+            no order here
+        {/each}
         {/if}
     </div>
 </main>

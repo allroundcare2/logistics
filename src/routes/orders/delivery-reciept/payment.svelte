@@ -1,11 +1,16 @@
 <script lang="ts">
     import { onMount } from "svelte";
     let files;
+    let filename = '';
     const selectFile = () => {
-        console.log('test');
         document.getElementById('files').click();
     };
+const upload =()=>{
 
+}
+const readFile =()=>{
+    console.log('my test',files);
+}
     onMount(() => {});
 </script>
 
@@ -25,9 +30,13 @@
                     <input type="text" placeholder="amount" />
                 </div>
 
-                <div class="mt-3">
-                    <button on:click="{selectFile}" class="upload btn float-end">upload a file</button>
-                    <input id="files" {files} type="file" />
+                <div class="mt-4 d-grid gap-2">
+                    <small>{filename}</small>
+                    <button on:click|preventDefault="{selectFile}" class="upload btn ">upload a file</button>
+                    <input accept="image/*, application/pdf" on:blur="{readFile}" id="files" {files} type="file" />
+                </div>
+                <div class="mt-5">
+                    <button type="submit" on:click|preventDefault="{upload}" class="upload btn float-end">Submit Form</button>
                 </div>
             </form>
         </div>
@@ -36,7 +45,7 @@
 
 <style>
     .upload {
-        width: 145px;
+      
         height: 45px;
         box-sizing: border-box;
         border: 1px solid #27ad60;

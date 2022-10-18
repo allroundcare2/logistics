@@ -1,17 +1,86 @@
+<script context="module">
+	// the (optional) preload function takes a
+	// `{ path, params, query }` object and turns it into
+	// the data we need to render the page
+	export async function preload(page, session) {
+		// the `slug` parameter is available because this file
+		// is called [slug].svelte
+		const { id } = page.query;
+;
+
+		return { id };
+	}
+</script>
+
+
 <script lang="ts">
+    import axios from "axios";
     import { onMount } from "svelte";
+    import {goto} from '@sapper/app';
+    import { checkForSession, getUrl } from "../../../functions/clientAuth";
+    import { handleNotification } from "../../../functions/clientNot";
+    import type { Iuser } from "../../../Model/accounts";
+    import Swal from "sweetalert2";
+    export let id;
     let files;
+    let amount;
+    let loading = false;
+    let url = '';
+    let name;
+    let user: Iuser = {};
     let filename = '';
     const selectFile = () => {
         document.getElementById('files').click();
     };
-const upload =()=>{
-
+const upload =async ()=>{
+   if(!files) return handleNotification('you have to upload a picture',
+   window, 'error', 'Error');
+   if(!amount) return handleNotification('you have enter an amount',
+   window, 'error', 'Error');
+   try {
+    loading = true;
+    let form = new FormData();
+    amount = Number(amount);
+    let body = {
+        amount, name, orderId: id
+    }
+    console.log(body);
+    form.append('img', files[0]);
+    form.append('body', JSON.stringify(body));
+  
+  let resp = await axios.post(`${url}/drivers/submit-reciept`, form, {
+                    headers: {
+                        Authorization: "Bearer " + user.token,
+                    },
+                });
+        if(resp){
+            loading = false;
+        const swalResp = await Swal.fire({
+                title: 'Success!!!',
+                text: 'You will be notified as soon as your request is being confirmed',
+                icon: 'success',
+                confirmButtonText: 'Dashboard'
+            });
+            if(swalResp){
+                goto('/orders');
+            }
+        }
+   } catch (error) {
+    loading = false;
+    console.log(error);
+    handleNotification('failed to upload reciept, try again', window,'error','oops!!!');
+   }
 }
 const readFile =()=>{
     console.log('my test',files);
+    if(files){
+        filename = files[0].name;
+    }
 }
-    onMount(() => {});
+    onMount(() => {
+        url = getUrl();
+        user = checkForSession(goto);
+    });
 </script>
 
 <main>
@@ -24,19 +93,25 @@ const readFile =()=>{
 
             <form class="mt-4 mb-4">
                 <div class="mb-2">
-                    <input type="text" placeholder="Name" />
+                    <input bind:value={name} type="text" placeholder="Name" />
                 </div>
                 <div class="mt-4">
-                    <input type="text" placeholder="amount" />
+                    <input bind:value={amount} type="text" placeholder="amount" />
                 </div>
 
                 <div class="mt-4 d-grid gap-2">
                     <small>{filename}</small>
-                    <button on:click|preventDefault="{selectFile}" class="upload btn ">upload a file</button>
-                    <input accept="image/*, application/pdf" on:blur="{readFile}" id="files" {files} type="file" />
+                    <button on:click|preventDefault="{selectFile}" on:blur={readFile} class="upload btn ">upload a file</button>
+                    <input accept="image/*, application/pdf"  on:change="{readFile}" id="files" bind:files type="file" />
                 </div>
                 <div class="mt-5">
-                    <button type="submit" on:click|preventDefault="{upload}" class="upload btn float-end">Submit Form</button>
+                    <button type="submit" on:click|preventDefault="{upload}" disabled={loading} class="upload btn float-end">
+                    {#if loading}
+                    Submiting Form...
+                    {:else}
+                    Submit Form
+                    {/if}
+                    </button>
                 </div>
             </form>
         </div>

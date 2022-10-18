@@ -2,8 +2,14 @@
 <script lang="ts">
 import { onMount } from "svelte";
 import {goto} from '@sapper/app';
+    import axios from "axios";
+    import type { Iuser } from "../Model/accounts";
+    import { checkForSession, getUrl } from "../functions/clientAuth";
     let bsOffcanvas: any;
     let win: any;
+    let session_user: Iuser = {};
+    let url = '';
+    let wallet = 0;
     const open =()=>{
         bsOffcanvas.show();
     }
@@ -15,11 +21,25 @@ import {goto} from '@sapper/app';
       localStorage.clear();
       goto('landing')
     }
-    onMount(()=>{
+    onMount(async ()=>{
         win = window;
+        url = getUrl();
+         session_user = checkForSession(goto);
+
         console.log(win);
         const myOffcanvas = document.getElementById('sidebar')
          bsOffcanvas = new win.bootstrap.Offcanvas(myOffcanvas);
+         try {
+        const result = await axios.get(url + '/drivers/dashboard', {
+                        headers: {
+                            Authorization: "Bearer " + session_user.token,
+                        },
+                    });
+        if(result){
+            wallet = result.data[0].wallet;
+        }
+      } catch (error) {
+      }
     })
 </script>
 
@@ -33,16 +53,16 @@ import {goto} from '@sapper/app';
     <div class="offcanvas-body">
       <div>
         <p>
-          <small>Balance: </small> <span class="balance">₦20,000.00</span>
+          <small>Balance: </small> <span class="balance">₦{wallet}</span>
         </p>
       </div>
     
      <div class="container">
-      <div class="row mb-3">
+      <div class="row mb-3" on:click="{()=>{nav('/')}}">
         <div class="col-2"><span class="fa fa-home"></span></div>
         <div class="col-8"><strong>Home</strong></div>
       </div>
-      <div class="row mb-3">
+      <div class="row mb-3" on:click="{()=>{nav('/earning')}}">
         <div class="col-2"><span class="fa fa-credit-card"></span></div>
         <div class="col-8"><strong>Earning</strong></div>
       </div>

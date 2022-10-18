@@ -1,47 +1,82 @@
-<script>
+<script lang="ts">
+    import { onMount } from "svelte";
     import Nav from "../../components/Nav.svelte";
+    import { checkForSession, getUrl } from "../../functions/clientAuth";
+    import type { Iuser } from "../../Model/accounts";
+    import {goto} from "@sapper/app";
+    import axios from "axios";
+    import { handleNotification } from "../../functions/clientNot";
+    import Loader from "../../components/Loader.svelte";
     const page = "Earning";
-    const transcations = [{}, {}];
+    let transcations = [];
+    let loading = true;
+    let url = '';
+    let session_user: Iuser = {};
+    onMount(async ()=>{
+        url = getUrl();
+         session_user = checkForSession(goto);
+         try {
+        const result = await axios.get(url + '/drivers/transcations', {
+                        headers: {
+                            Authorization: "Bearer " + session_user.token,
+                        },
+                    });
+        if(result){
+            handleNotification('transcation loaded successfully', window, 'success','ok');
+            transcations = result.data as any[];
+            console.log('transcation', transcations);
+        }
+      } catch (error) {
+        handleNotification('recent data didnt load successfully', window, 'error','error');
+      }
+    })
 </script>
 
 <main>
-    <div class="container">
-        <Nav {page} />
+  {#if !loading}
+  <div class="container">
+    <Nav {page} />
 
-        <p class="order-description mt-3">
-            Welcome to your payment account. View and withdraw your earnings
-        </p>
+    <p class="order-description mt-3">
+        Welcome to your payment account. View and withdraw your earnings
+    </p>
 
-        <div class="card card-body green mt-2 mb-3">
-            <p class="order-name text-center">Kaana Wallet Balance</p>
-            <p class="amount text-center">₦3,000</p>
+    <div class="card card-body green mt-2 mb-3">
+        <p class="order-name text-center">Kaana Wallet Balance</p>
+        <p class="amount text-center">₦3,000</p>
 
-            <p class="text-center"><button class="btn">withdraw</button></p>
-        </div>
-
-        <p class="heading">recent transcations</p>
-
-        {#each transcations as transcation}
-            <div
-                class="row mr-1 ml-1 orange-text"
-                style="border-bottom:  1px solid #D7D7D7;"
-            >
-                <div class="col-2">
-                    <img class="icon orange" src="svg/vector.svg" alt="" />
-                </div>
-                <div class="col-7">
-                    <p class="title"><strong>Wallet withdraw</strong></p>
-                    <p class="small">Nov 28, 2022</p>
-                </div>
-                <div class="col-3 currency"><p >₦30</p></div>
-            </div>
-        {:else}
-            <!-- empty list -->
-        {/each}
+        <p class="text-center"><button class="btn">withdraw</button></p>
     </div>
+
+    <p class="heading">recent transcations</p>
+
+    {#each transcations as transcation}
+        <div
+            class="row mr-1 ml-1 orange-text"
+            style="border-bottom:  1px solid #D7D7D7;"
+        >
+            <div class="col-2">
+                <img class="icon orange" src="svg/vector.svg" alt="" />
+            </div>
+            <div class="col-7">
+                <p class="title"><strong>Wallet withdraw</strong></p>
+                <p class="small">Nov 28, 2022</p>
+            </div>
+            <div class="col-3 currency"><p >₦30</p></div>
+        </div>
+    {:else}
+        <!-- empty list -->
+    {/each}
+</div>
+  {:else}
+    <Loader/>
+  {/if}
 </main>
 
 <style>
+    .small{
+        font-size: 12px;
+    }
     .title {
         font-weight: 400;
         font-size: 14px;

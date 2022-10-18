@@ -87,7 +87,7 @@
         goto('orders/delivery-reciept?id=' + order._id);
     }
     const view = (order: Iorder)=>{
-
+        goto('orders/delivery-reciept?id=' + order._id);
 }
     onMount(async () => {
         try {
@@ -116,7 +116,7 @@
                 dispatcherOrders.forEach((order,i)=>{
                     console.log(order.current_status,EorderStatus.COMPLETED );
                    console.log(order.current_status == EorderStatus.COMPLETED);
-                    if(order.current_status == 'completed' ||
+                    if(order.current_status == 'completed' || order.current_status == 'reciept submitted' ||
                      order.current_status == 'declined') {
                         console.log(order);
                         closedOrders.push(order);
@@ -346,7 +346,7 @@
                                   view(order);
                               }}
                               class="btn btn-outline btn-sm btn-success"
-                              >View Order</button
+                              >View</button
                           >
                               {/if}
                             </div>

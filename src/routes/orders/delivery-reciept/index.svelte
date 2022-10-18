@@ -99,7 +99,10 @@
         <hr>
         <p class="table-row mt-2"><span>Amount Earned</span> <span class="float-right">₦300</span></p>
         <hr>
-        <p class="table-row mt-2"><span>Payment Status</span> <span class="float-right">{order.current_status == 'completed' ? order.status[order.status.length -1].reason : 'paid' }</span></p>
+        <p class="table-row mt-2"><span>Payment Status</span> <span class="float-right">
+            {order.current_status == 'completed' 
+        || order.current_status == 'reciept submitted' ? order.status[order.status.length -1].reason 
+        || order.current_status : 'paid' }</span></p>
     </div>
 
     <div class="lower-buttons mt-5 row">

@@ -91,4 +91,28 @@ export interface Iorder {
     retailer_id?: number;
     status?: IorderStatus[];
 }
-
+export enum Etranscation {
+    WITHDRAWAL = 'withdrawal',
+    CREDIT = 'credit'
+}
+export enum EtranscationStatus {
+    PENDING = 'pending',
+    DENIED ='denied',
+    ACCEPTED = 'accepted'
+}
+export interface ItransStatus {
+    createdAt?: Date;
+    status?: EtranscationStatus;
+    reason?: string;
+}
+export interface Itranscation {
+    _id?: any;
+    currentStatus?: EtranscationStatus;
+    type?: Etranscation;
+    amount?: number;
+    createdAt?: Date;
+    description?: string;
+    driverId?: number;
+    status?: ItransStatus[];
+    adminId?: number;
+}

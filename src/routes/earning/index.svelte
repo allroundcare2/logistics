@@ -2,79 +2,146 @@
     import { onMount } from "svelte";
     import Nav from "../../components/Nav.svelte";
     import { checkForSession, getUrl } from "../../functions/clientAuth";
-    import type { Iuser } from "../../Model/accounts";
-    import {goto} from "@sapper/app";
+    import { Etranscation, Itranscation, Iuser } from "../../Model/accounts";
+    import { goto } from "@sapper/app";
     import axios from "axios";
     import { handleNotification } from "../../functions/clientNot";
     import Loader from "../../components/Loader.svelte";
     const page = "Earning";
     let transcations = [];
     let loading = true;
-    let url = '';
+    let wallet = 0;
+    let url = "";
     let session_user: Iuser = {};
-    onMount(async ()=>{
+    onMount(async () => {
         url = getUrl();
-         session_user = checkForSession(goto);
-         try {
-        const result = await axios.get(url + '/drivers/transcations', {
-                        headers: {
-                            Authorization: "Bearer " + session_user.token,
-                        },
-                    });
-        if(result){
-            handleNotification('transcation loaded successfully', window, 'success','ok');
-            transcations = result.data as any[];
-            console.log('transcation', transcations);
+        session_user = checkForSession(goto);
+        try {
+            const promises = [];
+            promises.push(
+                axios.get(url + "/drivers/transcations", {
+                    headers: {
+                        Authorization: "Bearer " + session_user.token,
+                    },
+                })
+            );
+            promises.push(
+                axios.get(url + "/drivers/driver_information", {
+                    headers: {
+                        Authorization: "Bearer " + session_user.token,
+                    },
+                })
+            );
+            const result = await Promise.all(promises);
+            if (result) {
+                loading = false;
+                handleNotification(
+                    "transcation loaded successfully",
+                    window,
+                    "success",
+                    "ok"
+                );
+                console.log(" the result:", result);
+                transcations = result[0].data as any[];
+                wallet = result[1].data.wallet;
+                console.log("transcation", result[1].data);
+            }
+        } catch (error) {
+            loading = false;
+            handleNotification(
+                "recent data didnt load successfully",
+                window,
+                "error",
+                "error"
+            );
         }
-      } catch (error) {
-        handleNotification('recent data didnt load successfully', window, 'error','error');
+    });
+
+    const withdrawl =async () =>{
+     
+        let resp : any= prompt('how much do you want to withdraw');
+            resp = Number(resp);
+      if(!isNaN(resp)){
+        let transcation: Itranscation = {amount: resp,description: 'withdrawal request from driver',type: Etranscation.WITHDRAWAL};
+       if(resp < wallet){
+        let data = await axios.post(`${url}/drivers/transcations`, {
+                    headers: {
+                        Authorization: "Bearer " + session_user.token,
+                    },
+                });
+       }
+       else{
+        handleNotification('you do not have enough money in your account', window, 'error', 'try again');
+       }
       }
-    })
+      else{
+        handleNotification('you must enter digit values only', window, 'error','try again');
+      }
+    }
 </script>
 
 <main>
-  {#if !loading}
-  <div class="container">
-    <Nav {page} />
+    {#if !loading}
+        <div class="container">
+            <Nav {page} />
 
-    <p class="order-description mt-3">
-        Welcome to your payment account. View and withdraw your earnings
-    </p>
+            <p class="order-description mt-3">
+                Welcome to your payment account. View and withdraw your earnings
+            </p>
 
-    <div class="card card-body green mt-2 mb-3">
-        <p class="order-name text-center">Kaana Wallet Balance</p>
-        <p class="amount text-center">₦3,000</p>
+            <div class="card card-body green mt-2 mb-3">
+                <p class="order-name text-center">Kaana Wallet Balance</p>
+                <p class="amount text-center">₦{wallet}</p>
 
-        <p class="text-center"><button class="btn">withdraw</button></p>
-    </div>
-
-    <p class="heading">recent transcations</p>
-
-    {#each transcations as transcation}
-        <div
-            class="row mr-1 ml-1 orange-text"
-            style="border-bottom:  1px solid #D7D7D7;"
-        >
-            <div class="col-2">
-                <img class="icon orange" src="svg/vector.svg" alt="" />
+                <p class="text-center">
+                    <button on:click={withdrawl} class="btn">withdraw</button>
+                </p>
             </div>
-            <div class="col-7">
-                <p class="title"><strong>Wallet withdraw</strong></p>
-                <p class="small">Nov 28, 2022</p>
-            </div>
-            <div class="col-3 currency"><p >₦30</p></div>
+
+            <p class="heading">recent transcations</p>
+
+            {#each transcations as transcation}
+                <div
+                    class="row mr-1 ml-1 orange-text"
+                    style="border-bottom:  1px solid #D7D7D7;"
+                >
+                    <div class="col-2">
+                        <img class="icon orange" src="svg/vector.svg" alt="" />
+                    </div>
+                    <div class="col-7">
+                        <p class="title">
+                            <strong>{transcation.description}</strong>
+                        </p>
+                        <p class="small">{transcation.createdAt}</p>
+                    </div>
+                    <div class="col-3 currency">
+                        <p>₦{transcation.amount}</p>
+                    </div>
+                </div>
+            {:else}
+                <div>
+                    <div class="text-center mb-5 pt-5">
+                        <img
+                            class="icon2 opacity-2 mt-4"
+                            src="svg/vector.svg"
+                            alt=""
+                        />
+
+                        <p class="mt-5">No transcation to display</p>
+                    </div>
+                </div>
+            {/each}
         </div>
     {:else}
-        <!-- empty list -->
-    {/each}
-</div>
-  {:else}
-    <Loader/>
-  {/if}
+        <Loader />
+    {/if}
 </main>
 
 <style>
-    .small{
+    .opacity-2 {
+        opacity: 0.5;
+    }
+    .small {
         font-size: 12px;
     }
     .title {
@@ -103,6 +170,10 @@
     .icon {
         width: 25px;
         height: 25px;
+    }
+    .icon2 {
+        width: 40px;
+        height: 40px;
     }
     .amount {
         font-weight: 700;

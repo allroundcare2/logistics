@@ -63,12 +63,24 @@
             resp = Number(resp);
       if(!isNaN(resp)){
         let transcation: Itranscation = {amount: resp,description: 'withdrawal request from driver',type: Etranscation.WITHDRAWAL};
-       if(resp < wallet){
-        let data = await axios.post(`${url}/drivers/transcations`, {
+       if(resp <= wallet){
+       try {
+        let data = await axios.post(`${url}/drivers/transcations`, transcation, {
                     headers: {
                         Authorization: "Bearer " + session_user.token,
                     },
                 });
+
+            if(data.data){
+                console.log(data.data);
+                transcations.push(data.data);
+                transcations = transcations;
+                handleNotification('transcation added successfully', window, 'success', 'ok');
+            }
+       } catch (error) {
+        console.log(error);
+        handleNotification('something went wrong we are on it', window, 'error', 'try again');
+       }
        }
        else{
         handleNotification('you do not have enough money in your account', window, 'error', 'try again');

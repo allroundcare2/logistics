@@ -1,9 +1,15 @@
 <script>
+    import {goto} from "@sapper/app";
     export let step;
+    const goSomeWhere =()=>{
+        if(step == 0){
+            goto('/landing');
+        }
+    }
 </script>
 
 <nav class="row">
-<div class="col-3"><i class="fa  fa-arrow-left"></i></div>
+<div class="col-3"><i on:click={goSomeWhere} class="fa   fa-arrow-left"></i></div>
 <div class="col-6">   <h2 class="text-center">ARC</h2> </div>
 <div class="col-3">{#if step != '0'}
      <!-- content here -->

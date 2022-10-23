@@ -4,8 +4,8 @@
     import { goto } from "@sapper/app";
     import RegisterNav from "../components/RegisterNav.svelte";
     import { handleNotification } from "../functions/clientNot";
-    import { EuserType, Iuser } from "../Model/accounts";
     import { getUrl } from "../functions/clientAuth";
+    import type { Iuser } from "../Model/accounts";
     let loading = false;
     let user: Iuser = {};
     const submit = async () => {
@@ -14,36 +14,21 @@
         loading = true;
         try {
             const loginResp = await (
-                await axios.post(`${url}/accounts/login`, user)
+                await axios.put(`${url}/accounts/forgot_password?email=${user.email}`)
             ).data;
-            if (loginResp.type == "success") {
+            if (loginResp.status == "success") {
                 loading = false;
-                if (loginResp.body.type == EuserType.DRIVER) {
-                    const resp = await Swal.fire({
+                const resp = await Swal.fire({
                         title: "success",
-                        text: "login successful",
+                        text: loginResp.msg,
                         icon: "success",
                     });
-                    if (resp) {
-                        localStorage.setItem(
-                            "arc_l_users",
-                            JSON.stringify(loginResp.body)
-                        );
-
-                        goto("/");
-                    }
-                } else {
-                    const resp = await Swal.fire({
-                        title: "wrong app",
-                        text: "oops! Seems you have an account with us but not a rider. Please try any of our other apps",
-                        icon: "error",
-                    });
-                }
+                    if(resp) goto('/set-password?email=' + user.email)
             } else {
                 loading = false;
                 const resp = await Swal.fire({
                     title: "incorrect credentials",
-                    text: "oops!!! Either your email or password is incorrect",
+                    text: loginResp.msg,
                     icon: "error",
                 });
             }
@@ -61,10 +46,9 @@
 <div class="main">
     <div class="container">
         <RegisterNav step="0" />
-        <p class="h3 mt-4">Login</p>
+        <p class="h3 mt-4">Forgot Password</p>
         <p class="text">
-            please provide your login details for easy and quick access to the
-            app
+           Enter your email address to get secret key to reset your password
         </p>
 
         <form on:submit|preventDefault={submit} style="margin-top: 40px">
@@ -79,30 +63,15 @@
                     placeholder="e.g joedoe@gmail.com"
                 />
             </div>
-            <div class="form-group mt-4">
-                <label for="password">Password</label>
-                <input
-                    type="password"
-                    class="form-control"
-                    id="password"
-                    bind:value={user.password}
-                    minlength="4"
-                    required
-                    placeholder="e.g ddjdnn233"
-                />
-            </div>
-            <div class="mt-4 mb-5">
-                <p class="text-center">
-                    <a href="/forget">forgot password?</a>
-                </p>
-            </div>
+       
+        
             <div class="mt-5">
                 {#if loading}
                     <button type="submit" disabled class="btn btn-full but"
-                        >Loging in...</button
+                        >submitting...</button
                     >
                 {:else}
-                    <button type="submit" class="btn btn-full but">Login</button
+                    <button type="submit" class="btn btn-full but">submit</button
                     >
                 {/if}
             </div>

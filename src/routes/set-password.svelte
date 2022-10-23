@@ -1,49 +1,53 @@
+
+<script context="module">
+	// the (optional) preload function takes a
+	// `{ path, params, query }` object and turns it into
+	// the data we need to render the page
+	export async function preload(page, session) {
+		// the `slug` parameter is available because this file
+		// is called [slug].svelte
+		const { email } = page.query;
+
+	
+
+		return { email };
+	}
+</script>
+
 <script lang="ts">
     import axios from "axios";
     import Swal from "sweetalert2";
     import { goto } from "@sapper/app";
     import RegisterNav from "../components/RegisterNav.svelte";
     import { handleNotification } from "../functions/clientNot";
-    import { EuserType, Iuser } from "../Model/accounts";
     import { getUrl } from "../functions/clientAuth";
     let loading = false;
-    let user: Iuser = {};
+    let password;
+    let confirm;
+    let token;
+    export let email: string;
     const submit = async () => {
+        if(!password || !confirm || confirm !== password) return handleNotification('password does not match', window,'error', 'error');
         const url = getUrl();
         handleNotification("checking details", window, "info", "loading...");
         loading = true;
         try {
             const loginResp = await (
-                await axios.post(`${url}/accounts/login`, user)
+                await axios.put(`${url}/accounts/set_password`,{email, password, token})
             ).data;
-            if (loginResp.type == "success") {
+            if (loginResp.status == "success") {
                 loading = false;
-                if (loginResp.body.type == EuserType.DRIVER) {
-                    const resp = await Swal.fire({
+                const resp = await Swal.fire({
                         title: "success",
-                        text: "login successful",
+                        text: loginResp.msg,
                         icon: "success",
                     });
-                    if (resp) {
-                        localStorage.setItem(
-                            "arc_l_users",
-                            JSON.stringify(loginResp.body)
-                        );
-
-                        goto("/");
-                    }
-                } else {
-                    const resp = await Swal.fire({
-                        title: "wrong app",
-                        text: "oops! Seems you have an account with us but not a rider. Please try any of our other apps",
-                        icon: "error",
-                    });
-                }
+                    if(resp) goto('/login');
             } else {
                 loading = false;
                 const resp = await Swal.fire({
-                    title: "incorrect credentials",
-                    text: "oops!!! Either your email or password is incorrect",
+                    title: "oops!!",
+                    text: loginResp.msg,
                     icon: "error",
                 });
             }
@@ -61,48 +65,54 @@
 <div class="main">
     <div class="container">
         <RegisterNav step="0" />
-        <p class="h3 mt-4">Login</p>
+        <p class="h3 mt-4">Set Password</p>
         <p class="text">
-            please provide your login details for easy and quick access to the
-            app
+           Enter your new password and confirm your password
         </p>
 
         <form on:submit|preventDefault={submit} style="margin-top: 40px">
             <div class="form-group mt-4">
-                <label for="email">Email Address</label>
+                <label for="email"> Token</label>
                 <input
-                    bind:value={user.email}
-                    type="email"
+                    bind:value={token}
+                    type="text"
                     class="form-control"
-                    id="email"
+                    id="token"
                     required
-                    placeholder="e.g joedoe@gmail.com"
+                    placeholder="enter your token"
                 />
             </div>
             <div class="form-group mt-4">
-                <label for="password">Password</label>
+                <label for="email">Password</label>
                 <input
+                    bind:value={password}
                     type="password"
                     class="form-control"
                     id="password"
-                    bind:value={user.password}
-                    minlength="4"
                     required
-                    placeholder="e.g ddjdnn233"
+                    placeholder="******"
                 />
             </div>
-            <div class="mt-4 mb-5">
-                <p class="text-center">
-                    <a href="/forget">forgot password?</a>
-                </p>
+            <div class="form-group mt-4">
+                <label for="email"> Confirm Password</label>
+                <input
+                    bind:value={confirm}
+                    type="password"
+                    class="form-control"
+                    id="confirm"
+                    required
+                    placeholder="******"
+                />
             </div>
+       
+        
             <div class="mt-5">
                 {#if loading}
                     <button type="submit" disabled class="btn btn-full but"
-                        >Loging in...</button
+                        >submitting...</button
                     >
                 {:else}
-                    <button type="submit" class="btn btn-full but">Login</button
+                    <button type="submit" class="btn btn-full but">submit</button
                     >
                 {/if}
             </div>

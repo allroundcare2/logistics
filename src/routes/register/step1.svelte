@@ -26,7 +26,7 @@
                 `${url}/accounts/register`,
                 driver
             );
-            if (axiosData.data.msg == "success") {
+            if (axiosData.data) {
                 console.log(axiosData.data);
                 sessionStorage.setItem(
                     "arc_driver",

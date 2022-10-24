@@ -50,6 +50,7 @@
                 });
             }
         } catch (error) {
+            console.log(error);
             let resp = await Swal.fire({
                 title: "user was not created. ",
                 text: "something went wrong , we are aware of it and are on it. Please try again later",

@@ -38,6 +38,7 @@ import { getUrl } from "../../functions/clientAuth";
                 }
             }
         } catch (error) {
+            console.log(error);
             let resp = await Swal.fire({
                     title: 'vehicle was not added. ',
                     text: 'something went wrong , we are aware of it and are on it. Please try again later',

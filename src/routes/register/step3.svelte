@@ -11,6 +11,7 @@ import { getUrl } from "../../functions/clientAuth";
     let ppName = '';
     let id_number;
     let issue_date ;
+    let loading = false;
     let url = '';
     $:{
        if(typeof(id) == 'object'){
@@ -31,8 +32,10 @@ import { getUrl } from "../../functions/clientAuth";
     }
     const submit = async ()=>{
         url = getUrl();
-        const user = JSON.parse(sessionStorage.getItem("arc_driver")).data;
+        loading = true;
+        const user = JSON.parse(sessionStorage.getItem("arc_driver"));
         if (!user) {
+            loading = false;
                 Swal.fire({
                     title: "No session",
                     text: "you do not have a current session, you can try logging in",
@@ -55,14 +58,16 @@ import { getUrl } from "../../functions/clientAuth";
                     title: `User information has been added `,
                     text: `We now have personal identification record of you. You can now provide your bank details `,
                     icon: "success",
-                    timer: 6000,
+                   
                 });
                 if (myResp) {
+                    loading = false;
                     goto("register/step4");
                 }
        }
        
        } catch (error) {
+        loading = false;
         console.log(error);
         let resp = await Swal.fire({
                     title: 'vehicle was not added. ',
@@ -146,7 +151,11 @@ import { getUrl } from "../../functions/clientAuth";
 
        
        <div class="mt-5 mb-3">
-        <button type="submit" class="btn btn-full but">Next</button>
+      {#if loading}
+      <button type="submit" disabled class="btn btn-full but">Submitting...</button>
+      {:else}
+      <button type="submit"  class="btn btn-full but">Next</button>
+      {/if}
        </div>
 
         

@@ -9,7 +9,7 @@ import { getUrl } from "../../functions/clientAuth";
     let driver: any ={};
     const submit = async () => {
        url = getUrl();
-        const user = JSON.parse(sessionStorage.getItem("arc_driver")).data;
+        const user = JSON.parse(sessionStorage.getItem("arc_driver"));
         if (!user) {
             Swal.fire({
                 title: "No session",

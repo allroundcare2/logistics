@@ -1,6 +1,30 @@
 {
+"shortcuts": [
+  {
+    "name": "ARC Login Page",
+    "short_name": "Login",
+    "description": "login page",
+    "url": "/login",
+    "icons": [
+      {
+        "src": "/screenshots/login.png",
+        "sizes": "192x192"
+      }
+    ]
+  }
+], 
 	"background_color": "#ffffff",
 	"theme_color": "#333333",
+	"orientation": "portrait",
+	"description":"All Round Care Logistics app for logistics drivers",
+	"screenshots": [
+		{
+			"src":"screenshots/mobile_landing.PNG",
+			"sizes":"400x800",
+			"type":"image/png",
+			"description":"Mobile landing page"
+		}
+	],
 	"name": "ARC-logistics",
 	"short_name": "ARC-L",
 	"display": "minimal-ui",

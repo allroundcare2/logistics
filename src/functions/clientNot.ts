@@ -5,7 +5,7 @@ export const handleNotification = (message: string, win: any, type: string, titl
      win.iziToast[type]({
          title,
          message,
-         position: 'topRight',
+         position: 'bottomRight',
          image,
          onClosed: func
      })

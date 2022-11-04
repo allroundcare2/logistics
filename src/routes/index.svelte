@@ -5,14 +5,17 @@
     import { goto } from "@sapper/app";
     import { handleNotification } from "../functions/clientNot";
     import axios from "axios";
+    import Loader from "../components/Loader.svelte";
     let session_user: any = {};
+    let loader = true;
     let dashboard = {wallet: 0.00, totalOrders: 0};
     let url = '';
     onMount(async () => {
         url = getUrl();
-         session_user = checkForSession(goto);
+         session_user = await checkForSession(goto);
          console.log(session_user);
-         handleNotification('loading dashboard details', window,'info', 'loading...');
+         if(session_user){
+            handleNotification('loading dashboard details', window,'info', 'loading...');
       try {
         const result = await axios.get(url + '/drivers/dashboard', {
                         headers: {
@@ -20,6 +23,7 @@
                         },
                     });
         if(result){
+            loader = false;
             handleNotification('dashboard details loaded successfully', window, 'success','ok');
             dashboard.wallet = result.data[0].wallet;
             dashboard.totalOrders = result.data[1];
@@ -27,6 +31,8 @@
       } catch (error) {
         handleNotification('recent data didnt load successfully', window, 'error','error');
       }
+         }
+      
 
         
     });
@@ -34,7 +40,7 @@
 <svelte:head>
     <title>ARC :: logistics dashboard</title>
 </svelte:head>
-{#if session_user}
+{#if !loader}
   
 <main>
     <div class="container">
@@ -103,7 +109,7 @@
     </div>
 </main>
 {:else}
-     loading
+    <Loader/>
 {/if}
 
 <style>

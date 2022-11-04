@@ -49,7 +49,7 @@ import { getUrl } from "../../functions/clientAuth";
             please provide us with your banking details for quicker payments
         </p>
 
-        <div style="margin-top: 40px">
+        <form on:submit|preventDefault={submit} style="margin-top: 40px">
             <div class="form-group mt-3">
                 <label for="holder">Bank Holder</label>
                 <input
@@ -64,7 +64,9 @@ import { getUrl } from "../../functions/clientAuth";
                 <input
                     required
                     bind:value={driver.account_number}
-                    type="text"
+                    type="number"
+                    min="0000000000" max="9999999999"
+                    
                     class="form-control"
                     id="accnt"
                     placeholder="e.g 103567253"
@@ -81,15 +83,17 @@ import { getUrl } from "../../functions/clientAuth";
                     <option disabled selected value="">pick your bank</option>
                     <option value="access">Access Bank</option>
                     <option value="gtb">Guarantee Trust Bank</option>
+                    <option value="union">Union Bank</option>
+                    <option value="UBA">United Bank of Africa</option>
                 </select>
             </div>
 
             <div class="mt-5">
-                <button on:click={submit} class="btn btn-full but"
+                <button type="submit" class="btn btn-full but"
                     >Complete</button
                 >
             </div>
-        </div>
+        </form>
     </div>
 </div>
 

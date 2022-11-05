@@ -42,8 +42,8 @@
             } else {
                 loading = false;
                 const resp = await Swal.fire({
-                    title: "incorrect credentials",
-                    text: "oops!!! Either your email or password is incorrect",
+                    title: "oops!!!",
+                    text: loginResp.msg,
                     icon: "error",
                 });
             }

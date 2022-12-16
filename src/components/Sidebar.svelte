@@ -52,9 +52,12 @@ import {goto} from '@sapper/app';
     </div>
     <div class="offcanvas-body">
       <div>
-        <p>
-          <small>Balance: </small> <span class="balance">₦{wallet}</span>
-        </p>
+        <div class="row">
+          <div class="col-6">
+            <small>Balance: </small> <span class="balance">₦{wallet}</span>  
+          </div>
+        </div>
+        
       </div>
     
      <div class="container">

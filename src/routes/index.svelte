@@ -8,22 +8,52 @@
     import Loader from "../components/Loader.svelte";
     let session_user: any = {};
     let loader = true;
+    let hasGeo = false;
     let dashboard = { wallet: 0.0, totalOrders: 0 };
     let url = "";
+    //let watchID: any;
     let isOnline = false;
-    const toggleOnline =()=>{
+    const toggleOnline =async ()=>{
         if(isOnline){
-
+            handleNotification('you are going offline', window, 'info','loading...');
+            isOnline = false;
+                try {
+                    const resp = await axios.put(url + "/drivers/go_offline",
+                    {}, {
+                    headers: {
+                        Authorization: "Bearer " + session_user.token,
+                    },
+                });
+                    console.log('resp', resp);
+                    if(resp.data){
+                        handleNotification('you are now offline you wont be getting any new order', window, 'success','ok');
+                    }
+                } catch (error) {
+                    isOnline = true;
+                    handleNotification('oops something went wrong try again later', window, 'error','error');
+                }
         }
         else{
-            
+            handleNotification('you are going online', window, 'info','loading...');
+              navigator.geolocation.getCurrentPosition(async (position) => {
+                isOnline = true;
+                try {
+                    const resp = await axios.put(url + "/drivers/go_online",
+                    {latitude: position.coords.latitude, longitude: position.coords.longitude}, {
+                    headers: {
+                        Authorization: "Bearer " + session_user.token,
+                    },
+                });
+                    console.log('resp', resp);
+                    if(resp.data){
+                        handleNotification('you are now online ready for orders', window, 'success','ok');
+                    }
+                } catch (error) {
+                    isOnline = false;
+                    handleNotification('oops something went wrong try again later', window, 'error','error');
+                }
+              });
         }
-        console.log(isOnline);
-        if (!navigator.geolocation) {
-    alert('online')
-  } else {
-    alert('not offline')
-  }
     }
     onMount(async () => {
         url = getUrl();
@@ -36,6 +66,13 @@
                 "info",
                 "loading..."
             );
+            if ('geolocation' in navigator) {
+  hasGeo = true;
+  handleNotification('geolocation is available on this device', window, 'success','ok');
+} else {
+  hasGeo = false;
+  handleNotification('your location cannot be found', window, 'error','error');
+}
             try {
                 const result = await axios.get(url + "/drivers/dashboard", {
                     headers: {

@@ -27,7 +27,7 @@
 	],
 	"name": "ARC-logistics",
 	"short_name": "ARC-L",
-	"display": "minimal-ui",
+	"display": "fullscreen",
 	"start_url": "/",
 	"icons": [
 		{

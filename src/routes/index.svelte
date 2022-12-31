@@ -55,6 +55,37 @@
               });
         }
     }
+    const checkIfOnline = async ()=>{
+        handleNotification('checking online status', window, 'info','loading...');
+        try {
+                const result = await axios.get(url + "/drivers/online_status", {
+                    headers: {
+                        Authorization: "Bearer " + session_user.token,
+                    },
+                });
+                console.log('the data is', result);
+                if (result.data.is_online) {
+                    isOnline = true;
+                    handleNotification(
+                        "status loaded",
+                        window,
+                        "success",
+                        "ok"
+                    );
+                  
+                }
+                else{
+                    isOnline = false;
+                }
+            } catch (error) {
+                handleNotification(
+                    "failed to load status",
+                    window,
+                    "error",
+                    "error"
+                );
+            }
+    }
     onMount(async () => {
         url = getUrl();
         session_user = await checkForSession(goto);
@@ -68,6 +99,7 @@
             );
             if ('geolocation' in navigator) {
   hasGeo = true;
+  checkIfOnline();
   handleNotification('geolocation is available on this device', window, 'success','ok');
 } else {
   hasGeo = false;

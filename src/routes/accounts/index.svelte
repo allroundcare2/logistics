@@ -6,11 +6,12 @@
         import Nav from "../../components/Nav.svelte";
     import type { Iuser } from "../../Model/accounts";
     import {goto} from "@sapper/app";
-    import { checkForSession } from "../../functions/clientAuth";
-    import { url } from "../../Model/public";
+    import { checkForSession, getUrl } from "../../functions/clientAuth";
+    
     import { handleNotification } from "../../functions/clientNot";
         const page = "Accounts";
         let tab = "personal";
+        let url = '';
         let user: Iuser = {};
         let loading = false;
         let tempDriver: any = {};
@@ -21,6 +22,7 @@
     
         onMount(async ()=>{
             user = checkForSession(goto);
+            url = getUrl();
           try {
             const driverResp = await axios.get(`${url}accounts/driver`, {
                 headers: {

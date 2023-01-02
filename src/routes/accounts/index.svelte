@@ -7,10 +7,11 @@
     import type { Iuser } from "../../Model/accounts";
     import {goto} from "@sapper/app";
     import { checkForSession, getUrl } from "../../functions/clientAuth";
-    
     import { handleNotification } from "../../functions/clientNot";
         const page = "Accounts";
         let tab = "personal";
+        let personalButton = true;
+        let othersButton = true;
         let url = '';
         let user: Iuser = {};
         let loading = false;
@@ -19,7 +20,30 @@
         const switchTab = (myTap) => {
             tab = myTap;
         };
-    
+    const updatePersonalDetails = async () =>{
+       
+        let data: any = {
+            first_name: driver.first_name,
+            last_name: driver.last_name,
+            phone: driver.phone
+        };
+        try {
+            handleNotification('updating personal info', window, 'info', 'updating');
+             personalButton = false;
+          const resp = await  axios.put(url + "/accounts/update_user_details",data,{
+                    headers: {
+                        Authorization: "Bearer " + user.token,
+                    },
+                });
+                handleNotification('personal information updated successfully', window, 'success','ok');
+                personalButton = true;
+        } catch (error) {
+            console.log(error);
+            handleNotification('personal information failed to update', window,'error','error');
+            personalButton = true;
+        }
+       
+    }
         onMount(async ()=>{
             user = checkForSession(goto);
             url = getUrl();
@@ -44,7 +68,9 @@
     
         })
     </script>
-    
+    <svelte:head>
+        <title>Driver Accounts Details </title>
+    </svelte:head>
     <main>
         <div class="container">
             <Nav {page} />
@@ -150,8 +176,8 @@
                </div>
     
                <div class="text-center mt-3 mb-3">
-                   <button class="btn btn-success btn-block submit "
-                       >confirm</button
+                   <button on:click={updatePersonalDetails} disabled={!personalButton} class="btn btn-success btn-block submit "
+                       >{personalButton? 'confirm' : 'confirming...'}</button
                    >
                </div>
            </div>

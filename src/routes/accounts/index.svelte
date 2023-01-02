@@ -24,7 +24,7 @@
             user = checkForSession(goto);
             url = getUrl();
           try {
-            const driverResp = await axios.get(`${url}accounts/driver`, {
+            const driverResp = await axios.get(`${url}/accounts/driver`, {
                 headers: {
                     "Authorization": "Bearer " + user.token
                 }

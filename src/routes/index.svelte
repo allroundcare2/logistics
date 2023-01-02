@@ -88,6 +88,7 @@
     }
     onMount(async () => {
         url = getUrl();
+        console.log('your url', url);
         session_user = await checkForSession(goto);
         console.log(session_user);
         if (session_user) {

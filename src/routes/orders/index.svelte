@@ -239,7 +239,7 @@
                 no order here
             {/each}
         {:else if tab == 'pickup'}
-            {#each orders as order}
+            {#each dispatcherOrders as order}
                 <div class="row">
                     <div class="col-12">
                         <div class="card card-body">

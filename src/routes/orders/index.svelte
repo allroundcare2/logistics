@@ -225,7 +225,7 @@
                                 <div class="col-3">
                                     <button
                                         on:click={() => {
-                                            continueRide(order);
+                                            startRide(order);
                                         }}
                                         class="btn btn-outline btn-sm btn-success"
                                         >start</button
@@ -278,7 +278,7 @@
                                 <div class="col-3">
                                     <button
                                         on:click={() => {
-                                            continueRide(order);
+                                            startRide(order);
                                         }}
                                         class="btn btn-outline btn-sm btn-success"
                                         >continue</button

@@ -4,18 +4,19 @@
     import { onMount } from "svelte";
     
         import Nav from "../../components/Nav.svelte";
-    import type { Iuser } from "../../Model/accounts";
+    import { EvehicleType, Idriver, Iuser, Ivehicle } from "../../Model/accounts";
     import {goto} from "@sapper/app";
     import { checkForSession, getUrl } from "../../functions/clientAuth";
     import { handleNotification } from "../../functions/clientNot";
         const page = "Accounts";
         let tab = "personal";
+        let vehicle: Ivehicle ={};
         let personalButton = true;
         let othersButton = true;
         let url = '';
         let user: Iuser = {};
         let loading = false;
-        let tempDriver: any = {};
+        let tempDriver: Idriver = {};
         let driver: any = {};
         const switchTab = (myTap) => {
             tab = myTap;
@@ -44,6 +45,23 @@
         }
        
     }
+
+    const updateOtherDetails = async () =>{
+       
+       let vehicleRecord: any = {
+           first_name: driver.first_name,
+           last_name: driver.last_name,
+           phone: driver.phone
+       };
+       let bankInfo: any = {
+           bank_name: tempDriver.bank_name,
+           last_name: driver.last_name,
+           phone: driver.phone
+       };
+       
+      
+      
+   }
         onMount(async ()=>{
             user = checkForSession(goto);
             url = getUrl();
@@ -59,7 +77,9 @@
              if(driverResp){
                 loading = true;
                 driver = await driverResp.data;
-                tempDriver = JSON.parse(JSON.stringify(driver));
+                tempDriver = driver.driver;
+
+                vehicle = driver.vehicle;
              }
           } catch (error) {
             handleNotification('user record didnt load successfully', window, 'error','oops!!!');
@@ -188,12 +208,22 @@
                    <label class="" for="">Vehicle type</label>
                    <div class="row">
                        <div class="col-12">
-                           <select class="pl-3 ml-1 mr-1">
+                           <select title="vehicle" id="vehicle" bind:value={vehicle.vehicle_type} class="pl-3 ml-1 mr-1">
                                <option disabled value="">
                                    select your vehicle type</option
                                >
-                               <option value="Lagos">Bicycle</option>
-                               <option value="Calabar">Calabar</option>
+                               <option selected={vehicle.vehicle_type ==EvehicleType.BIKE } value={EvehicleType.BIKE}
+                               >{EvehicleType.BIKE}
+                               </option
+                           >  <option selected={vehicle.vehicle_type ==EvehicleType.BUS } value={EvehicleType.BUS}
+                           >{EvehicleType.BUS}</option
+                       >
+                           <option selected={vehicle.vehicle_type ==EvehicleType.MINI_VAN } value={EvehicleType.MINI_VAN}
+                           >{EvehicleType.MINI_VAN}</option
+                       >
+                           <option selected={vehicle.vehicle_type ==EvehicleType.TRICYCLE } value={EvehicleType.TRICYCLE} 
+                           >{EvehicleType.TRICYCLE}</option
+                       >
                            </select>
                        </div>
                    </div>
@@ -205,7 +235,7 @@
                            <input
                                class="pl-3 ml-1 mr-1"
                                type="text"
-                               bind:value="{driver.vehicle_manufacturer}"
+                               bind:value="{vehicle.vehicle_manufacturer}"
                                placeholder=""
                            />
                        </div>
@@ -236,7 +266,7 @@
                            <input
                                class="pl-3 ml-1 mr-1"
                                type="text"
-                               bind:value="{driver.account_number}"
+                               bind:value="{tempDriver.account_number}"
                                placeholder="eg. 0087652616"
                            />
                        </div>
@@ -244,7 +274,7 @@
                </div>
     
                <div class="text-center mt-3 mb-3">
-                   <button class="btn btn-success btn-block submit "
+                   <button on:click={updateOtherDetails} disabled={!othersButton} class="btn btn-success btn-block submit "
                        >confirm</button
                    >
                </div>

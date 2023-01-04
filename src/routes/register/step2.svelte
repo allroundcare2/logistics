@@ -81,8 +81,17 @@ import { getUrl } from "../../functions/clientAuth";
                     <option disabled selected value="">pick Vechile type</option
                     >
                     <option value={EvehicleType.BIKE}
-                        >{EvehicleType.BIKE}</option
-                    >
+                        >{EvehicleType.BIKE}
+                        </option
+                    >  <option value={EvehicleType.BUS}
+                    >{EvehicleType.BUS}</option
+                >
+                    <option value={EvehicleType.MINI_VAN}
+                    >{EvehicleType.MINI_VAN}</option
+                >
+                    <option value={EvehicleType.TRICYCLE}
+                    >{EvehicleType.TRICYCLE}</option
+                >
                 </select>
             </div>
             <div class="form-group mt-3">

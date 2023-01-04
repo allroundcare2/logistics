@@ -183,7 +183,7 @@
             </div>
         </div>
         {#if tab == "confirm"}
-            {#each dispatcherOrders as order}
+            {#each orders as order}
                 <div class="row">
                     <div class="col-12">
                         <div class="card card-body">
@@ -225,7 +225,7 @@
                                 <div class="col-3">
                                     <button
                                         on:click={() => {
-                                            startRide(order);
+                                            continueRide(order);
                                         }}
                                         class="btn btn-outline btn-sm btn-success"
                                         >start</button

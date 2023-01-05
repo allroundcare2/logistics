@@ -1,5 +1,3 @@
-
-
 <script lang="ts">
     import axios from "axios";
 
@@ -47,28 +45,48 @@
     };
     const startRide = async (order: Iorder) => {
         try {
-            const orderResp = await axios.put(
-                `${url}/order/accept_order_dispatcher?id=${order._id}`,
-                {},
+            const isActiveOrder = await axios.get(
+                `${url}/order/is_uncompleted_ride`,
                 {
                     headers: {
                         Authorization: "Bearer " + user.token,
                     },
                 }
             );
-            if (orderResp) {
-                order.dispatcher_id = orderResp.data.id;
-                order.current_status = orderResp.data.current_status;
-                order.status.push(orderResp.data.status);
-            
+            if (!isActiveOrder.data.status) {
+                const orderResp = await axios.put(
+                    `${url}/order/accept_order_dispatcher?id=${order._id}`,
+                    {},
+                    {
+                        headers: {
+                            Authorization: "Bearer " + user.token,
+                        },
+                    }
+                );
+                if (orderResp) {
+                    order.dispatcher_id = orderResp.data.id;
+                    order.current_status = orderResp.data.current_status;
+                    order.status.push(orderResp.data.status);
 
-                let data = await Swal.fire({
-                    icon: "success",
-                    title: "Order has bwen added successfully",
-                    text: "success",
-                });
+                    localStorage.setItem(
+                        "arc_active_order",
+                        JSON.stringify(order)
+                    );
+                    let data = await Swal.fire({
+                        icon: "success",
+                        title: "Order has been added successfully",
+                        text: "success",
+                    });
 
-              goto(`orders/delivery?id=${order._id}`)
+                    goto(`orders/delivery?id=${order._id}`);
+                }
+            }
+            else{
+                Swal.fire({
+                icon: "error",
+                text: "you cant start a new ride because of unresolved ride. Check the complete tab to finish",
+                title: "oops!!!",
+            });
             }
         } catch (error) {
             Swal.fire({
@@ -83,12 +101,12 @@
         localStorage.setItem("arc_active_order", JSON.stringify(order));
         goto("orders/delivery?id=" + order._id);
     };
-    const makePayment = (order: Iorder)=>{
-        goto('orders/delivery-reciept?id=' + order._id);
-    }
-    const view = (order: Iorder)=>{
-        goto('orders/delivery-reciept?id=' + order._id);
-}
+    const makePayment = (order: Iorder) => {
+        goto("orders/delivery-reciept?id=" + order._id);
+    };
+    const view = (order: Iorder) => {
+        goto("orders/delivery-reciept?id=" + order._id);
+    };
     onMount(async () => {
         try {
             user = checkForSession(goto);
@@ -113,19 +131,21 @@
                     "ok"
                 );
                 dispatcherOrders = orderResp.data;
-                dispatcherOrders.forEach((order,i)=>{
-                    console.log(order.current_status,EorderStatus.COMPLETED );
-                   console.log(order.current_status == EorderStatus.COMPLETED);
-                    if(order.current_status == 'completed' || order.current_status == 'reciept submitted' ||
-                     order.current_status == 'declined') {
+                dispatcherOrders.forEach((order, i) => {
+                    console.log(order.current_status, EorderStatus.COMPLETED);
+                    console.log(order.current_status == EorderStatus.COMPLETED);
+                    if (
+                        order.current_status == EorderStatus.COMPLETED ||
+                        order.current_status == EorderStatus.SUBMIT_RECIEPT ||
+                        order.current_status == EorderStatus.DECLINED_BY_DRIVER
+                    ) {
                         console.log(order);
                         closedOrders.push(order);
-                        dispatcherOrders.splice(i,1);
+                        dispatcherOrders.splice(i, 1);
                     }
                 });
                 dispatcherOrders = dispatcherOrders;
                 closedOrders = closedOrders;
-              
             }
         } catch (error) {
             console.log(error);
@@ -146,17 +166,7 @@
 
         <div class="my-tab  mt-4">
             <div class="row">
-                <div class="col-4 pl-2 pr-2  text-center">
-                    <button
-                        on:click={() => {
-                            switchTab("confirm");
-                        }}
-                        style="width: 90%;"
-                        class=" btn button-my "
-                        class:active-color={tab == "confirm"}
-                        class:plain-color={tab != "confirm"}>Confirmed</button
-                    >
-                </div>
+             
                 <div class="col-4 pl-2 pr-2 text-center">
                     <button
                         on:click={() => {
@@ -168,7 +178,17 @@
                         class:plain-color={tab != "pickup"}>Pickup</button
                     >
                 </div>
-
+                <div class="col-4 pl-2 pr-2  text-center">
+                    <button
+                        on:click={() => {
+                            switchTab("confirm");
+                        }}
+                        style="width: 90%;"
+                        class=" btn button-my "
+                        class:active-color={tab == "confirm"}
+                        class:plain-color={tab != "confirm"}>Confirmed</button
+                    >
+                </div>
                 <div class="col-4 pl-2 pr-2 text-center">
                     <button
                         on:click={() => {
@@ -238,8 +258,65 @@
             {:else}
                 no order here
             {/each}
-        {:else if tab == 'pickup'}
+        {:else if tab == "pickup"}
             {#each dispatcherOrders as order}
+                <div class="row">
+                    <div class="col-12">
+                        <div class="card card-body">
+                            <div class="row pt-0">
+                                <div class="col-8 pt-0 mt-0">
+                                    <span class="order-name">Order 311 </span>
+                                </div>
+                                <div class="col-4 text-end ">
+                                    <p class="amount">₦300</p>
+                                </div>
+                            </div>
+                            <div class="row mt-0">
+                                <div class="col-9">
+                                    <div class="row">
+                                        <div class="col-1">
+                                            <span class="order-status" />
+                                        </div>
+                                        <div class="col-10 pt-0">
+                                            <span class="order-description "
+                                                >{order.retailer_address}</span
+                                            >
+                                            <br />
+                                            <span class="order-description "
+                                                >{order.shopper_address}</span
+                                            >
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-1">
+                                            <span class="order-status" />
+                                        </div>
+                                        <div class="col-10 pt-0">
+                                            <span class="order-description "
+                                                >{order.retailer_address}</span
+                                            >
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-3">
+                                    <button
+                                        on:click={() => {
+                                            startRide(order);
+                                        }}
+                                        class="btn btn-outline btn-sm btn-success"
+                                        >continue</button
+                                    >
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {:else}
+                no order here
+            {/each}
+        {:else if tab == "delivery"}
+            {#each closedOrders as order}
                 <div class="row">
                     <div class="col-12">
                         <div class="card card-body">
@@ -276,89 +353,31 @@
                                     </div>
                                 </div>
                                 <div class="col-3">
-                                    <button
-                                        on:click={() => {
-                                            startRide(order);
-                                        }}
-                                        class="btn btn-outline btn-sm btn-success"
-                                        >continue</button
-                                    >
+                                    {#if order.current_status == "completed"}
+                                        <button
+                                            on:click={() => {
+                                                makePayment(order);
+                                            }}
+                                            class="btn btn-outline btn-sm btn-success"
+                                            >Pay</button
+                                        >
+                                    {:else}
+                                        <button
+                                            on:click={() => {
+                                                view(order);
+                                            }}
+                                            class="btn btn-outline btn-sm btn-success"
+                                            >View</button
+                                        >
+                                    {/if}
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
-
-            
             {:else}
                 no order here
             {/each}
-
-            {:else if tab == 'delivery'}
-            {#each closedOrders as order}
-            <div class="row">
-                <div class="col-12">
-                    <div class="card card-body">
-                        <div class="row pt-0">
-                            <div class="col-8 pt-0 mt-0">
-                                <span class="order-name">Order 311 </span>
-                            </div>
-                            <div class="col-4 text-end ">
-                                <p class="amount">₦300</p>
-                            </div>
-                        </div>
-                        <div class="row mt-0">
-                            <div class="col-9">
-                                <div class="row">
-                                    <div class="col-1">
-                                        <span class="order-status" />
-                                    </div>
-                                    <div class="col-10 pt-0">
-                                        <span class="order-description "
-                                            >{order.shopper_address}</span
-                                        >
-                                    </div>
-                                </div>
-
-                                <div class="row">
-                                    <div class="col-1">
-                                        <span class="order-status" />
-                                    </div>
-                                    <div class="col-10 pt-0">
-                                        <span class="order-description "
-                                            >{order.retailer_address}</span
-                                        >
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-3">
-                              {#if order.current_status == 'completed'}
-                              <button
-                              on:click={() => {
-                                  makePayment(order);
-                              }}
-                              class="btn btn-outline btn-sm btn-success"
-                              >Pay</button
-                          >
-                              {:else}
-                              <button
-                              on:click={() => {
-                                  view(order);
-                              }}
-                              class="btn btn-outline btn-sm btn-success"
-                              >View</button
-                          >
-                              {/if}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-        
-        {:else}
-            no order here
-        {/each}
         {/if}
     </div>
 </main>

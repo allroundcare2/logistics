@@ -57,15 +57,22 @@ export interface Iprice {
     publicId?: string;
     prices: Iprice[];
   }
-  export enum EorderStatus {
+  
+export enum EorderStatus {
     CREATED = "created",
     APPROVED = 'approved',
+    ASSIGNED_SHOPPER = "assigned to shoppers",
+    SHOPPER_ACCEPT = "accepted by shopper",
+    DECLINED_BY_SHOPPER = 'declined by shopper',
     DELIVERY = 'ready for delivery',
+    ASSIGNED_DISPATCHER = "assigned to dispatcher",
     DISPATCHER_ACCEPT = 'accepted by dispatch rider',
     GOTO_SHOPPER = 'go to shopper',
     GOTO_RETAILER = 'go to retailer',
     COMPLETED = 'completed',
-    DECLINED = 'declined'
+    DECLINED_BY_DRIVER = 'declined by driver',
+    SUBMIT_RECIEPT = 'reciept submitted',
+    CANCEL = "cancel order"
 }
 export interface IorderStatus {
     name?: EorderStatus,

@@ -173,7 +173,7 @@ export let id;
         win = window;
         url = getUrl();
         user = checkForSession(goto);
-      //  let temp = JSON.parse(localStorage.getItem("arc_active_order"));
+       let temp = JSON.parse(localStorage.getItem("arc_active_order"));
      
         driverIcon = win.L.icon({
             iconUrl: "leaflet/images/rider.svg",

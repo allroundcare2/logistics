@@ -1,11 +1,28 @@
+<script context="module">
+    // the (optional) preload function takes a
+    // `{ path, params, query }` object and turns it into
+    // the data we need to render the page
+    export async function preload(page, session) {
+        // the `slug` parameter is available because this file
+        // is called [slug].svelte
+        const { id } = page.query;
+        return { id };
+    }
+</script>
+
 <script lang="ts">
     import Nav from "../../components/Nav.svelte";
 import Swal from "sweetalert2";
 import { onMount } from "svelte";
 import {goto} from '@sapper/app';
+    import axios from "axios";
+    import { checkForSession, getUrl } from "../../functions/clientAuth";
     const page = "Cancel the Order";
     let cancelVariable = '';
+    export let id;
+    let user: any = {};
     let win: any;
+    let url = '';
     let loading = false;
     const cancelOrder =async ()=>{
         
@@ -26,21 +43,41 @@ import {goto} from '@sapper/app';
             message: 'cancelling order',
             title: 'submitting...'
         });
-        setTimeout(async ()=>{
-        const swalResponse =  await Swal.fire({
+        try {
+            const orderResp = await axios.put(
+                `${url}/drivers/decline_order?id=${id}`,
+                {reason:cancelOrder},
+                {
+                    headers: {
+                        Authorization: "Bearer " + user.token,
+                    },
+                }
+            );
+
+            if(orderResp){
+                const swalResponse =  await Swal.fire({
                 icon: 'success',
-                text: `order cancelled successfully because ${cancelVariable}`,
+                text: `order cancelled successfully because ${cancelVariable} wait for admin approval`,
                 title: 'success'
             });
-            if(swalResponse) goto('orders')
-        },4000)
-        console.log(cancelVariable);
-
+            }
+        
+        } catch (error) {
+            Swal.fire({
+                icon: "error",
+                text: "something went wrong when cancelling the trip",
+                title: "oops!!!",
+            });
         }
+      
+        
+    } 
        
     }
     onMount(()=>{
         win = window;
+        url = getUrl();
+       const user = checkForSession(goto);
     })
 </script>
 
@@ -73,31 +110,60 @@ import {goto} from '@sapper/app';
         <p class="topic">Why do you want to cancel this order?</p>
         <p class="bigger-text">
             Pickup location was offline
-            <input bind:group="{cancelVariable}" value="offline" class="float-end" type="radio" name="reason" id="" />
+            <input
+                bind:group={cancelVariable}
+                value="offline"
+                class="float-end"
+                type="radio"
+                name="reason"
+                id=""
+            />
         </p>
         <p class="bigger-text">
             Information provided was wrong
-            <input bind:group="{cancelVariable}" value="wrong info" class="float-end" type="radio" name="reason" id="" />
+            <input
+                bind:group={cancelVariable}
+                value="wrong info"
+                class="float-end"
+                type="radio"
+                name="reason"
+                id=""
+            />
         </p>
         <p class="bigger-text">
             Pickup customer was rude
-            <input bind:group="{cancelVariable}" value="rude customer" class="float-end" type="radio" name="reason" id="" />
+            <input
+                bind:group={cancelVariable}
+                value="rude customer"
+                class="float-end"
+                type="radio"
+                name="reason"
+                id=""
+            />
         </p>
         <p class="bigger-text">
             I have mechanical issues
-            <input bind:group="{cancelVariable}" value="mechanical issues" class="float-end" type="radio" name="reason" id="" />
+            <input
+                bind:group={cancelVariable}
+                value="mechanical issues"
+                class="float-end"
+                type="radio"
+                name="reason"
+                id=""
+            />
         </p>
 
         <div class="mt-5">
-          {#if cancelVariable}
-          <button on:click="{cancelOrder}" class="btn my-btn btn-success">confirm</button>
-          {:else if  loading}
-          <button class="btn my-btn btn-success">confirming...</button>
-          {:else}
-          <button disabled  class="btn my-btn btn-success">confirm</button>
-          {/if}
+            {#if cancelVariable}
+                <button on:click={cancelOrder} class="btn my-btn btn-success"
+                    >confirm</button
+                >
+            {:else if loading}
+                <button class="btn my-btn btn-success">confirming...</button>
+            {:else}
+                <button disabled class="btn my-btn btn-success">confirm</button>
+            {/if}
         </div>
-        
     </div>
 </main>
 

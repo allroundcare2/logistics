@@ -46,7 +46,7 @@
     const startRide = async (order: Iorder) => {
         try {
             const isActiveOrder = await axios.get(
-                `${url}/order/is_uncompleted_ride`,
+                `${url}/drivers/is_uncompleted_ride`,
                 {
                     headers: {
                         Authorization: "Bearer " + user.token,

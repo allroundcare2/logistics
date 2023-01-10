@@ -136,7 +136,8 @@
                     if (
                         order.current_status == EorderStatus.COMPLETED ||
                         order.current_status == EorderStatus.SUBMIT_RECIEPT ||
-                        order.current_status == EorderStatus.DECLINED_BY_DRIVER
+                        order.current_status == EorderStatus.DECLINED_BY_DRIVER ||
+                        order.current_status == EorderStatus.PAYMENT_APPROVED
                     ) {
                         console.log(order);
                         closedOrders.push(order);

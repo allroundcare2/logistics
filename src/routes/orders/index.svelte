@@ -131,13 +131,11 @@
                 );
                 dispatcherOrders = orderResp.data;
                 dispatcherOrders.forEach((order, i) => {
-                    console.log(order.current_status, EorderStatus.COMPLETED);
-                    console.log(order.current_status == EorderStatus.COMPLETED);
                     if (
-                        order.current_status == EorderStatus.COMPLETED ||
-                        order.current_status == EorderStatus.SUBMIT_RECIEPT ||
-                        order.current_status == EorderStatus.DECLINED_BY_DRIVER ||
-                        order.current_status == EorderStatus.PAYMENT_APPROVED
+                        order.current_status == 'completed' ||
+                        order.current_status == 'reciept submitted' ||
+                        order.current_status == 'declined by driver' ||
+                        order.current_status == 'payment approved by admin'
                     ) {
                         console.log(order);
                         closedOrders.push(order);

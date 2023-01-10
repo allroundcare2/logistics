@@ -9,7 +9,6 @@
     import { EorderStatus, Iorder } from "../../Model/accounts";
     import { handleNotification } from "../../functions/clientNot";
     import Swal from "sweetalert2";
-    import Delivery from "./delivery.svelte";
     const db = new zango.Db("arc_db", 1, { orders: ["_id"] });
 
     const orders_collections = db.collection("orders");

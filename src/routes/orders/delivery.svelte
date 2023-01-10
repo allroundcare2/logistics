@@ -32,7 +32,8 @@ export let id;
     let map;
     let order: Iorder = { shopper: {}, retailer:{} };
     let win: any;
-    let loading = false;
+
+    let notLoading = true;
     let driverMarker: any = {};
     let shopperMarker: any = {};
     let retailerMaker: any = {};
@@ -67,7 +68,7 @@ export let id;
         goto(`orders/complete-order?id=${order._id}`)
     }
     const gotoShopper = async () => {
-        loading = true;
+        notLoading = false;
         handleNotification("updating movement", window, "info", "updating...");
         try {
             const orderResp = await axios.put(
@@ -80,6 +81,7 @@ export let id;
                 }
             );
             if (orderResp) {
+                notLoading = true;
                 handleNotification(
                     "you can now going to pickup the order",
                     window,
@@ -92,12 +94,14 @@ export let id;
                     location,
                     order.shopper_location
                 );
-                loading = false;
+                
             }
-        } catch (error) {}
+        } catch (error) {
+            notLoading = true;
+        }
     };
     const gotoRetailer = async () => {
-        loading = true;
+        notLoading = false;
         handleNotification("updating movement", window, "info", "updating...");
         try {
             const orderResp = await axios.put(
@@ -110,7 +114,7 @@ export let id;
                 }
             );
             if (orderResp) {
-                loading = false;
+                notLoading = true;
                 handleNotification(
                     "you can now going to deliver the order",
                     window,
@@ -134,7 +138,7 @@ export let id;
                     ).addTo(map);
             }
         } catch (error) {
-            loading = false;
+            notLoading = true;
             console.error(error);
             handleNotification('oops!!! order was not updated successfully', window, 'error','oops!!!');
             
@@ -198,7 +202,7 @@ export let id;
                 "updating order record",
                 window,
                 "info",
-                "loading"
+                "loadin"
             );
 
             const orderResp = await axios.get(
@@ -216,7 +220,7 @@ export let id;
                     "success",
                     "ok"
                 );
-                loading = true;
+                notLoading = true;
 
                 order = orderResp.data;
                 console.log(order);
@@ -394,7 +398,7 @@ export let id;
 
             <div class="row mb-2">
                 <div class="col text-center">
-                    {#if loading}
+                    {#if notLoading}
                         <button
                             on:click={gotoShopper}
                             class="btn btn-success my-btn my-primary"
@@ -451,7 +455,7 @@ export let id;
             </div>
 
             <div class="mt-3">
-               {#if loading}
+               {#if notLoading}
                <button on:click="{gotoRetailer}" style="width: 100%;" class="btn btn-block btn-success"
                >Recieved from shopper</button
            >
@@ -504,7 +508,7 @@ export let id;
             </div>
 
             <div class="mt-3">
-               {#if loading}
+               {#if notLoading}
                <button on:click="{endOrder}" style="width: 100%;" class="btn btn-block btn-success"
                >Complete Delivery</button
            >

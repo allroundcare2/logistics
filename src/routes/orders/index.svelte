@@ -142,6 +142,8 @@
                         dispatcherOrders.splice(i, 1);
                     }
                 });
+                console.log('dispatch', dispatcherOrders);
+                console.log('closed', closedOrders);
                 dispatcherOrders = dispatcherOrders;
                 closedOrders = closedOrders;
             }

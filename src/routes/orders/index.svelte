@@ -6,7 +6,7 @@
     import Nav from "../../components/Nav.svelte";
     import { checkForSession, getUrl } from "../../functions/clientAuth";
     import { goto } from "@sapper/app";
-    import { EorderStatus, Iorder } from "../../Model/accounts";
+    import type {  Iorder } from "../../Model/accounts";
     import { handleNotification } from "../../functions/clientNot";
     import Swal from "sweetalert2";
     const db = new zango.Db("arc_db", 1, { orders: ["_id"] });
@@ -115,7 +115,7 @@
             console.log(location);
 
             const orderResp = await axios.get(
-                `${url}/order/retrieve_dispatcher_orders`,
+                `${url}/drivers/open_orders`,
                 {
                     headers: {
                         Authorization: "Bearer " + user.token,
@@ -138,14 +138,33 @@
                         order.current_status == 'payment approved by admin'
                     ) {
                         console.log(order);
-                        closedOrders.push(order);
+                        
                         dispatcherOrders.splice(i, 1);
                     }
                 });
                 console.log('dispatch', dispatcherOrders);
-                console.log('closed', closedOrders);
+                
                 dispatcherOrders = dispatcherOrders;
-                closedOrders = closedOrders;
+              
+            }
+
+            const closedResp = await axios.get(
+                `${url}/drivers/closed_orders`,
+                {
+                    headers: {
+                        Authorization: "Bearer " + user.token,
+                    },
+                }
+            );
+            if (closedResp) {
+                handleNotification(
+                    "orders retrieved successfully",
+                    window,
+                    "success",
+                    "ok"
+                );
+                closedOrders = closedResp.data;
+               closedOrders = closedOrders;
             }
         } catch (error) {
             console.log(error);

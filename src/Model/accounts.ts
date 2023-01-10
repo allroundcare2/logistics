@@ -71,8 +71,10 @@ export enum EorderStatus {
     GOTO_RETAILER = 'go to retailer',
     COMPLETED = 'completed',
     DECLINED_BY_DRIVER = 'declined by driver',
+    PAYMENT_APPROVED = 'payment approved by admin',
     SUBMIT_RECIEPT = 'reciept submitted',
     CANCEL = "cancel order"
+
 }
 export interface IorderStatus {
     name?: EorderStatus,

@@ -18,6 +18,7 @@
     let orders: Iorder[] = [];
     let dispatcherOrders: Iorder[] = [];
     let closedOrders: Iorder[] = [];
+    let continueOrder: Iorder[] = [];
     let tab = "confirm";
     const getLocation = () => {
         return new Promise((resolve, reject) => {
@@ -166,6 +167,25 @@
                 closedOrders = closedResp.data;
                closedOrders = closedOrders;
             }
+
+            const ongoingRep = await axios.get(
+                `${url}/drivers/ongoing_ride`,
+                {
+                    headers: {
+                        Authorization: "Bearer " + user.token,
+                    },
+                }
+            );
+            if (ongoingRep) {
+                handleNotification(
+                    "orders retrieved successfully",
+                    window,
+                    "success",
+                    "ok"
+                );
+                continueOrder = ongoingRep.data;
+               continueOrder = continueOrder;
+            }
         } catch (error) {
             console.log(error);
         }
@@ -222,7 +242,7 @@
             </div>
         </div>
         {#if tab == "confirm"}
-            {#each orders as order}
+            {#each continueOrder as order}
                 <div class="row">
                     <div class="col-12">
                         <div class="card card-body">
@@ -264,7 +284,7 @@
                                 <div class="col-3">
                                     <button
                                         on:click={() => {
-                                            startRide(order);
+                                            continueRide(order);
                                         }}
                                         class="btn btn-outline btn-sm btn-success"
                                         >start</button

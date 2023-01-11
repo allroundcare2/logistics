@@ -249,9 +249,7 @@
                             <div class="row pt-0">
                                 <div class="col-8 pt-0 mt-0">
                                     <span class="order-name">{order._id} </span>
-                                    <span class="distance p-1 ml-2"
-                                        >{order.distance.toFixed(2)}km</span
-                                    >
+                                   
                                 </div>
                                 <div class="col-4 text-end ">
                                     <p class="amount">₦300</p>

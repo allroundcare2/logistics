@@ -57,7 +57,9 @@
         }
     };
 </script>
-
+<svelte:head>
+    <title>ARC logisitics Login</title>
+</svelte:head>
 <div class="main">
     <div class="container">
         <RegisterNav step="0" />

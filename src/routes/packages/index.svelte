@@ -19,7 +19,7 @@
     let dispatcherOrders: Iorder[] = [];
     let closedOrders: Iorder[] = [];
     let continueOrder: Iorder[] = [];
-    let tab = "confirm";
+    let tab = "pickup";
     const getLocation = () => {
         return new Promise((resolve, reject) => {
             if (navigator.geolocation) {
@@ -131,6 +131,10 @@
                 dispatcherOrders = [];
                 closedOrders = [];
                 continueOrder = [];
+                orders.forEach((order)=>{
+                    if(order.status == 'start')dispatcherOrders.push(order);
+                    
+                })
               
            
             }
@@ -249,10 +253,10 @@
                         <div class="card card-body">
                             <div class="row pt-0">
                                 <div class="col-8 pt-0 mt-0">
-                                    <span class="order-name">{order._id}</span>
+                                    <span class="order-name">{order.delivery_type}</span>
                                 </div>
                                 <div class="col-4 text-end">
-                                    <p class="amount">₦300</p>
+                                    <p class="amount">₦{Number(order.packages.reduce((accumulator, currentValue) => accumulator + currentValue.cost, 0)).toFixed(2)}</p>
                                 </div>
                             </div>
                             <div class="row mt-0">
@@ -263,25 +267,21 @@
                                         </div>
                                         <div class="col-10 pt-0">
                                             <span class="order-description"
-                                                >{order.retailer_address}</span
-                                            >
-                                            <br />
-                                            <span class="order-description"
-                                                >{order.shopper_address}</span
-                                            >
+                                            >{order.packages[0].pickupAddress}</span
+                                        >
+                                        <br />
+                                        {#each order.packages[0].destinations as item}
+                                        <span class="order-description"
+                                        >{item.destinationAddress}</span
+                                    >
+                                    <br />
+                                        {/each}
+                                         
+                                           
                                         </div>
                                     </div>
 
-                                    <div class="row">
-                                        <div class="col-1">
-                                            <span class="order-status" />
-                                        </div>
-                                        <div class="col-10 pt-0">
-                                            <span class="order-description"
-                                                >{order.retailer_address}</span
-                                            >
-                                        </div>
-                                    </div>
+                                  
                                 </div>
                                 <div class="col-3">
                                     <button

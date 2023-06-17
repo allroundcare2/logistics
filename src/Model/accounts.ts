@@ -86,6 +86,8 @@ export interface Ilocation {
     longitude: number;
 }
 export interface Iorder {
+    delivery_type?: any;
+    packages?: any;
     _id?: any;
     dispatcher_id?: number;
     shopper_id?: number;

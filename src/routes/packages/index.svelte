@@ -43,10 +43,11 @@
     const switchTab = (myTap) => {
         tab = myTap;
     };
-    const startRide = async (order: Iorder) => {
+    const startRide = async (order: any) => {
+        console.log("my order", order);
         try {
             const isActiveOrder = await axios.get(
-                `${url}/drivers/is_uncompleted_ride`,
+                `${url}/drivers/is_uncompleted_delivery`,
                 {
                     headers: {
                         Authorization: "Bearer " + user.token,
@@ -55,7 +56,7 @@
             );
             if (!isActiveOrder.data.status) {
                 const orderResp = await axios.put(
-                    `${url}/order/accept_order_dispatcher?id=${order._id}`,
+                    `${url}/drivers/accept_delivery_request?id=${order.id}`,
                     {},
                     {
                         headers: {
@@ -96,9 +97,9 @@
         }
     };
 
-    const continueRide = async (order: Iorder) => {
-        localStorage.setItem("arc_active_order", JSON.stringify(order));
-        goto("orders/delivery?id=" + order._id);
+    const continueRide = async (order: any) => {
+        localStorage.setItem("arc_active_delivery", JSON.stringify(order));
+        goto("packages/delivery?id=" + order.id);
     };
     const makePayment = (order: Iorder) => {
         goto("orders/delivery-reciept?id=" + order._id);
@@ -131,14 +132,11 @@
                 dispatcherOrders = [];
                 closedOrders = [];
                 continueOrder = [];
-                orders.forEach((order)=>{
-                    if(order.status == 'start')dispatcherOrders.push(order);
-                    
-                })
-              
-           
+                orders.forEach((order) => {
+                    if (order.status == "start") dispatcherOrders.push(order);
+                    if (order.status == "on_going") continueOrder.push(order);
+                });
             }
-
         } catch (error) {
             console.log(error);
         }
@@ -200,10 +198,21 @@
                         <div class="card card-body">
                             <div class="row pt-0">
                                 <div class="col-8 pt-0 mt-0">
-                                    <span class="order-name">{order._id} </span>
+                                    <span class="order-name"
+                                        >{order.delivery_type}</span
+                                    >
                                 </div>
                                 <div class="col-4 text-end">
-                                    <p class="amount">₦300</p>
+                                    <p class="amount">
+                                        ₦{Number(
+                                            order.packages.reduce(
+                                                (accumulator, currentValue) =>
+                                                    accumulator +
+                                                    currentValue.cost,
+                                                0
+                                            )
+                                        ).toFixed(2)}
+                                    </p>
                                 </div>
                             </div>
                             <div class="row mt-0">
@@ -214,19 +223,16 @@
                                         </div>
                                         <div class="col-10 pt-0">
                                             <span class="order-description"
-                                                >{order.shopper_address}</span
+                                                >{order.packages[0]
+                                                    .pickupAddress}</span
                                             >
-                                        </div>
-                                    </div>
-
-                                    <div class="row">
-                                        <div class="col-1">
-                                            <span class="order-status" />
-                                        </div>
-                                        <div class="col-10 pt-0">
-                                            <span class="order-description"
-                                                >{order.retailer_address}</span
-                                            >
+                                            <br />
+                                            {#each order.packages[0].destinations as item}
+                                                <span class="order-description"
+                                                    >{item.destinationAddress}</span
+                                                >
+                                                <br />
+                                            {/each}
                                         </div>
                                     </div>
                                 </div>
@@ -253,10 +259,21 @@
                         <div class="card card-body">
                             <div class="row pt-0">
                                 <div class="col-8 pt-0 mt-0">
-                                    <span class="order-name">{order.delivery_type}</span>
+                                    <span class="order-name"
+                                        >{order.delivery_type}</span
+                                    >
                                 </div>
                                 <div class="col-4 text-end">
-                                    <p class="amount">₦{Number(order.packages.reduce((accumulator, currentValue) => accumulator + currentValue.cost, 0)).toFixed(2)}</p>
+                                    <p class="amount">
+                                        ₦{Number(
+                                            order.packages.reduce(
+                                                (accumulator, currentValue) =>
+                                                    accumulator +
+                                                    currentValue.cost,
+                                                0
+                                            )
+                                        ).toFixed(2)}
+                                    </p>
                                 </div>
                             </div>
                             <div class="row mt-0">
@@ -267,21 +284,18 @@
                                         </div>
                                         <div class="col-10 pt-0">
                                             <span class="order-description"
-                                            >{order.packages[0].pickupAddress}</span
-                                        >
-                                        <br />
-                                        {#each order.packages[0].destinations as item}
-                                        <span class="order-description"
-                                        >{item.destinationAddress}</span
-                                    >
-                                    <br />
-                                        {/each}
-                                         
-                                           
+                                                >{order.packages[0]
+                                                    .pickupAddress}</span
+                                            >
+                                            <br />
+                                            {#each order.packages[0].destinations as item}
+                                                <span class="order-description"
+                                                    >{item.destinationAddress}</span
+                                                >
+                                                <br />
+                                            {/each}
                                         </div>
                                     </div>
-
-                                  
                                 </div>
                                 <div class="col-3">
                                     <button

@@ -4,10 +4,11 @@ export enum EuserType {
 }
 
 export enum EvehicleType {
-    BIKE = 'motorcycle',
-    MINI_VAN = 'minivan',
-    BUS = "bus",
-    TRICYCLE = 'tricycle'
+    BICYCLE = 'bicycle',
+    OKODA = 'okada',
+    CAR ='car',
+    VAN ='van',
+    TRICYCLE ='tricycle'
 
 }
 export interface Ivehicle {

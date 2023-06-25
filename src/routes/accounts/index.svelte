@@ -212,17 +212,20 @@
                                <option disabled value="">
                                    select your vehicle type</option
                                >
-                               <option selected={vehicle.vehicle_type ==EvehicleType.BIKE } value={EvehicleType.BIKE}
-                               >{EvehicleType.BIKE}
+                               <option selected={vehicle.vehicle_type ==EvehicleType.BICYCLE } value={EvehicleType.BICYCLE}
+                               >{EvehicleType.BICYCLE}
                                </option
-                           >  <option selected={vehicle.vehicle_type ==EvehicleType.BUS } value={EvehicleType.BUS}
-                           >{EvehicleType.BUS}</option
+                           >  <option selected={vehicle.vehicle_type ==EvehicleType.CAR } value={EvehicleType.CAR}
+                           >{EvehicleType.CAR}</option
                        >
-                           <option selected={vehicle.vehicle_type ==EvehicleType.MINI_VAN } value={EvehicleType.MINI_VAN}
-                           >{EvehicleType.MINI_VAN}</option
+                           <option selected={vehicle.vehicle_type ==EvehicleType.OKODA } value={EvehicleType.OKODA}
+                           >{EvehicleType.OKODA}</option
                        >
                            <option selected={vehicle.vehicle_type ==EvehicleType.TRICYCLE } value={EvehicleType.TRICYCLE} 
                            >{EvehicleType.TRICYCLE}</option
+                       >
+                       <option selected={vehicle.vehicle_type ==EvehicleType.VAN } value={EvehicleType.VAN} 
+                           >{EvehicleType.VAN}</option
                        >
                            </select>
                        </div>

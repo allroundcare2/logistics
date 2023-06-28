@@ -32,7 +32,8 @@ export let id;
     let map;
     let order: Iorder = { shopper: {}, retailer:{} };
     let win: any;
-
+    let activePackage: any = {}; 
+    let activeDestination: any ={};
     let notLoading = true;
     let driverMarker: any = {};
     let dispatchLocation : Ilocation = {latitude: 0, longitude: 0};
@@ -134,6 +135,13 @@ export let id;
         }
     };
 
+    const addDriverMarker  =()=> {
+         driverMarker = new win.google.maps.Marker({
+          position: { lat: dispatchLocation.latitude, lng: dispatchLocation.longitude },
+          map: map,
+        });
+      }
+
     const watchMovement =()=>{
         watchID = navigator.geolocation.watchPosition((pos)=>{
             //success callback function
@@ -153,16 +161,26 @@ export let id;
     }
 
     const mapInit =()=>{
-          var map = new win.google.maps.Map(document.getElementById('map'), {
-      center: { lat: 37.7749, lng: -122.4194 }, // Set the initial map center
-      zoom: 12 // Set the initial zoom level
+    map = new win.google.maps.Map(document.getElementById('map'), {
+      center: { lat: dispatchLocation.latitude, lng: dispatchLocation.longitude }, // Set the initial map center
+      zoom: 10 // Set the initial zoom level
     });
+    addDriverMarker();
     }
     onMount(async () => {
         win = window;
         url = getUrl();
         user = checkForSession(goto);
        let temp = JSON.parse(localStorage.getItem("arc_active_delivery"));
+       temp.packages.forEach((p : any)=>{
+        console.log(p);
+        if(p.current_status != 'DELIVERED'){ 
+            activePackage = p;
+            activeDestination = p.destinations[0];
+            
+             return}
+       })
+      
      
        mapInit();
         try {
@@ -211,19 +229,19 @@ export let id;
     </nav>
     <div id="map" />
     <div class="actionBox fixed-bottom card card-body">
-        {#if order.current_status == EorderStatus.DISPATCHER_ACCEPT}
-            <div>
+        {#if activePackage}
+            <!-- <div>
                 <small>Pickup Address</small>
                 <span class="distance p-1 ml-2 float-end text-center"
                     >{distance.toFixed(2)}km</span
                 >
-            </div>
+            </div> -->
             <div class="row">
                 <div class="col-1 padded">
                     <span class="order-status mr-2" />
                 </div>
                 <div class="col-11">
-                    <strong> {order.shopper_address} </strong>
+                    <strong> {activePackage.pickupAddress } </strong>
                 </div>
             </div>
             <div>
@@ -234,7 +252,7 @@ export let id;
                     <span class="order-status-delivery mr-2" />
                 </div>
                 <div class="col-11">
-                    <strong> {order.retailer_address} </strong>
+                    <strong> {activeDestination.destinationAddress} </strong>
                 </div>
             </div>
             <div class="row">
@@ -247,20 +265,20 @@ export let id;
             </div>
             <div class="row">
                 <div class="col">
-                    <strong>₦300</strong>
+                    <strong>₦{Number(activePackage.cost).toFixed(2)}</strong>
                 </div>
                 <div class="col">
-                    <strong>Pay on delivery</strong>
+                    <strong>{activePackage.isPaid? 'paid on pickup':'pay on delivery'}</strong>
                 </div>
             </div>
             <div class="row">
-                <div class="col-6 ">
+                <div class="col-7 ">
                     <strong> Order ID </strong><br />
-                    <small style="overflow-x: auto;">{order._id}</small>
+                    <small style="overflow-x: auto;">{activePackage.packageId}</small>
                 </div>
-                <div class="col-6">
+                <div class="col-5">
                     <strong>status</strong><br />
-                    <small>{order.current_status}</small>
+                    <small>{activePackage.currentStatus}</small>
                 </div>
             </div>
 

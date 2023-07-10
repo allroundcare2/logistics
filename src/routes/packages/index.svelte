@@ -54,10 +54,10 @@
                     },
                 }
             );
-            if (!isActiveOrder.data.status) {
-                const orderResp = await axios.put(
+            if (!isActiveOrder.data.data.status) {
+                const orderResp = await axios.get(
                     `${url}/drivers/accept_delivery_request?id=${order.id}`,
-                    {},
+                    
                     {
                         headers: {
                             Authorization: "Bearer " + user.token,
@@ -89,6 +89,7 @@
                 });
             }
         } catch (error) {
+            console.log(error);
             Swal.fire({
                 icon: "error",
                 text: "something went wrong when starting this trip",
@@ -227,12 +228,11 @@
                                                     .pickupAddress}</span
                                             >
                                             <br />
-                                            {#each order.packages[0].destinations as item}
-                                                <span class="order-description"
-                                                    >{item.destinationAddress}</span
-                                                >
-                                                <br />
-                                            {/each}
+
+                                            <span class="order-description"
+                                                >{order.packages[0]
+                                                    .destinationAddress}</span
+                                            >
                                         </div>
                                     </div>
                                 </div>
@@ -288,12 +288,10 @@
                                                     .pickupAddress}</span
                                             >
                                             <br />
-                                            {#each order.packages[0].destinations as item}
-                                                <span class="order-description"
-                                                    >{item.destinationAddress}</span
-                                                >
-                                                <br />
-                                            {/each}
+                                            <span class="order-description"
+                                                >{order.packages[0]
+                                                    .destinationAddress}</span
+                                            >
                                         </div>
                                     </div>
                                 </div>

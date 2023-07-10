@@ -1,22 +1,20 @@
 <script context="module">
-	// the (optional) preload function takes a
-	// `{ path, params, query }` object and turns it into
-	// the data we need to render the page
-	export async function preload(page, session) {
-		// the `slug` parameter is available because this file
-		// is called [slug].svelte
-		const { id } = page.query;
-;
-
-		return { id };
-	}
+    // the (optional) preload function takes a
+    // `{ path, params, query }` object and turns it into
+    // the data we need to render the page
+    export async function preload(page, session) {
+        // the `slug` parameter is available because this file
+        // is called [slug].svelte
+        const { id } = page.query;
+        return { id };
+    }
 </script>
+
 <script lang="ts">
     import axios from "axios";
-
     import { onMount } from "svelte";
-
     import Sidebar from "../../components/Sidebar.svelte";
+    import ProductsModal from "../../components/package/ProductsModal.svelte";
     import {
         checkForSession,
         getDistanceFromLatLonInKm,
@@ -25,18 +23,20 @@
     import { handleNotification } from "../../functions/clientNot";
     import { EorderStatus, Ilocation, Iorder } from "../../Model/accounts";
     import { goto } from "@sapper/app";
-import Swal from "sweetalert2";
-export let id;
+    import Swal from "sweetalert2";
+    export let id;
     let url = "";
     let watchID: any = 0;
+    let productModal: any ={};
     let map;
-    let order: Iorder = { shopper: {}, retailer:{} };
+    let delivery: any = {};
+    let modalProducts: any[]= [];
+    let order: Iorder = { shopper: {}, retailer: {} };
     let win: any;
-    let activePackage: any = {}; 
-    let activeDestination: any ={};
+    let activePackage: any = {};
     let notLoading = true;
     let driverMarker: any = {};
-    let dispatchLocation : Ilocation = {latitude: 0, longitude: 0};
+    let dispatchLocation: Ilocation = { latitude: 0, longitude: 0 };
     let distance = 1;
     let user: any;
     const getLocation = (): Promise<any> => {
@@ -59,15 +59,15 @@ export let id;
             }
         });
     };
-    const endOrder =()=>{
-        goto(`orders/complete-order?id=${order._id}`)
-    }
-    const gotoShopper = async () => {
+    const endOrder = () => {
+        goto(`orders/complete-order?id=${order._id}`);
+    };
+    const startRide = async (activeP: any) => {
         notLoading = false;
         handleNotification("updating movement", window, "info", "updating...");
         try {
             const orderResp = await axios.put(
-                `${url}/order/start_ride_to_shopper?id=${order._id}`,
+                `${url}/drivers/start_package_delivery?packageId=${activeP.packageId}`,
                 {},
                 {
                     headers: {
@@ -83,15 +83,11 @@ export let id;
                     "success",
                     "ok"
                 );
-                order.current_status = EorderStatus.GOTO_SHOPPER;
-                let location = await getLocation();
-                distance = getDistanceFromLatLonInKm(
-                    location,
-                    order.shopper_location
-                );
-                
+             await  updateDelivery()
             }
         } catch (error) {
+            handleNotification('ride could not start, you might be offline',win,'error','error');
+            console.log(error);
             notLoading = true;
         }
     };
@@ -117,72 +113,96 @@ export let id;
                     "ok"
                 );
                 console.log(orderResp);
-               
+
                 order.current_status = EorderStatus.GOTO_RETAILER;
-               
+
                 distance = getDistanceFromLatLonInKm(
                     dispatchLocation,
                     order.retailer_location
                 );
-         
-             
             }
         } catch (error) {
             notLoading = true;
             console.error(error);
-            handleNotification('oops!!! order was not updated successfully', window, 'error','oops!!!');
-            
+            handleNotification(
+                "oops!!! order was not updated successfully",
+                window,
+                "error",
+                "oops!!!"
+            );
         }
     };
 
-    const addDriverMarker  =()=> {
-         driverMarker = new win.google.maps.Marker({
-          position: { lat: dispatchLocation.latitude, lng: dispatchLocation.longitude },
-          map: map,
+    const addDriverMarker = () => {
+        driverMarker = new win.google.maps.Marker({
+            position: {
+                lat: dispatchLocation.latitude,
+                lng: dispatchLocation.longitude,
+            },
+            map: map,
         });
-      }
+    };
 
-    const watchMovement =()=>{
-        watchID = navigator.geolocation.watchPosition((pos)=>{
-            //success callback function
-           dispatchLocation.latitude = pos.coords.latitude;
-           dispatchLocation.longitude = pos.coords.longitude;
-           const latlng = win.L.latLng(dispatchLocation.latitude, dispatchLocation.longitude);
-           driverMarker.setLatLng(latlng);
-       
-        }, (error)=>{
-            console.log(error);
-            handleNotification('oops!!! your location was not properly retrieved', window,'error','oops!!')
-        }, {
-            enableHighAccuracy: true,
-  timeout: 5000,
-  maximumAge: 0
+    const watchMovement = () => {
+        watchID = navigator.geolocation.watchPosition(
+            (pos) => {
+                //success callback function
+                dispatchLocation.latitude = pos.coords.latitude;
+                dispatchLocation.longitude = pos.coords.longitude;
+                const latlng = win.L.latLng(
+                    dispatchLocation.latitude,
+                    dispatchLocation.longitude
+                );
+                driverMarker.setLatLng(latlng);
+            },
+            (error) => {
+                console.log(error);
+                handleNotification(
+                    "oops!!! your location was not properly retrieved",
+                    window,
+                    "error",
+                    "oops!!"
+                );
+            },
+            {
+                enableHighAccuracy: true,
+                timeout: 5000,
+                maximumAge: 0,
+            }
+        );
+    };
+
+    const mapInit = () => {
+        map = new win.google.maps.Map(document.getElementById("map"), {
+            center: {
+                lat: dispatchLocation.latitude,
+                lng: dispatchLocation.longitude,
+            }, // Set the initial map center
+            zoom: 10, // Set the initial zoom level
         });
-    }
-
-    const mapInit =()=>{
-    map = new win.google.maps.Map(document.getElementById('map'), {
-      center: { lat: dispatchLocation.latitude, lng: dispatchLocation.longitude }, // Set the initial map center
-      zoom: 10 // Set the initial zoom level
-    });
-    addDriverMarker();
-    }
+        addDriverMarker();
+    };
     onMount(async () => {
         win = window;
         url = getUrl();
-        user = checkForSession(goto);
-       let temp = JSON.parse(localStorage.getItem("arc_active_delivery"));
-       temp.packages.forEach((p : any)=>{
-        console.log(p);
-        if(p.current_status != 'DELIVERED'){ 
-            activePackage = p;
-            activeDestination = p.destinations[0];
+        try {
             
-             return}
-       })
-      
-     
-       mapInit();
+        productModal = new win.bootstrap.Modal(document.getElementById('productModal'));
+        } catch (error) {
+            console.log(error);
+        }
+        user = checkForSession(goto);
+        let temp = JSON.parse(localStorage.getItem("arc_active_delivery"));
+        delivery = temp;
+        temp.packages.forEach((p: any) => {
+            console.log(p);
+            if (p.current_status != "DELIVERED") {
+                activePackage = p;
+                return;
+            }
+        });
+       // updateDelivery();
+        mapInit();
         try {
             handleNotification(
                 "updating order record",
@@ -190,33 +210,43 @@ export let id;
                 "info",
                 "loadin"
             );
-
-         
         } catch (error) {
             console.log("error", error);
         }
     });
+    const openProductModal = ()=>{
+        console.log('orders ', activePackage);
+        modalProducts = activePackage.products;
+        productModal.show();
+    }
 
-    const terminateOrder = async ()=>{
-      const resp = await  Swal.fire({
-        showConfirmButton: true,
-        showDenyButton: true,
-            confirmButtonText: 'end transcation order',
-            denyButtonText: 'cancel',
-            text: 'by confirming this request you have agreed to re-assign this order to another driver',
-            icon:'question'
+    const updateDelivery =async ()=>{
+        try {
+        const resp = await  axios.get(`${url}/drivers/delivery_details?id=${delivery.id}`, {
+                    headers: {
+                        Authorization: "Bearer " + user.token,
+                    },
+                });
+        console.log('the shape of dna',resp.data);
+        if(resp.data.message == 'success'){
+            delivery = resp.data.data;
+            console.log('deliveries', delivery);
+            delivery.packages.forEach((p: any) => {
+            console.log('pino code',p);
+            if (p.current_status != "DELIVERED") {
+                activePackage = p;
+                return;
+            }
         });
-
-        console.log(resp);
-        if(resp.isConfirmed){
-            //call rejection modal
-            goto(`orders/cancel-order?id=${order._id}`);
+        handleNotification('reload is successful', win, 'success','Ok');
+        }
+        } catch (error) {
+            
         }
     }
 </script>
-<svelte:head>
-   
-</svelte:head>
+
+<svelte:head />
 <main>
     <nav
         class="row fixed-top"
@@ -230,18 +260,13 @@ export let id;
     <div id="map" />
     <div class="actionBox fixed-bottom card card-body">
         {#if activePackage}
-            <!-- <div>
-                <small>Pickup Address</small>
-                <span class="distance p-1 ml-2 float-end text-center"
-                    >{distance.toFixed(2)}km</span
-                >
-            </div> -->
+         
             <div class="row">
                 <div class="col-1 padded">
                     <span class="order-status mr-2" />
                 </div>
                 <div class="col-11">
-                    <strong> {activePackage.pickupAddress } </strong>
+                    <strong> {activePackage.pickupAddress} </strong>
                 </div>
             </div>
             <div>
@@ -252,7 +277,7 @@ export let id;
                     <span class="order-status-delivery mr-2" />
                 </div>
                 <div class="col-11">
-                    <strong> {activeDestination.destinationAddress} </strong>
+                    <strong> {activePackage.destinationAddress} <i on:click={openProductModal} style="color: green" class="float-end fa fa-shopping-cart "></i> </strong>
                 </div>
             </div>
             <div class="row">
@@ -268,13 +293,19 @@ export let id;
                     <strong>₦{Number(activePackage.cost).toFixed(2)}</strong>
                 </div>
                 <div class="col">
-                    <strong>{activePackage.isPaid? 'paid on pickup':'pay on delivery'}</strong>
+                    <strong
+                        >{activePackage.isPaid
+                            ? "paid on pickup"
+                            : "pay on delivery"}</strong
+                    >
                 </div>
             </div>
             <div class="row">
-                <div class="col-7 ">
-                    <strong> Order ID </strong><br />
-                    <small style="overflow-x: auto;">{activePackage.packageId}</small>
+                <div class="col-7">
+                    <strong> Package ID </strong><br />
+                    <small style="overflow-x: auto;"
+                        >{activePackage.packageId}</small
+                    >
                 </div>
                 <div class="col-5">
                     <strong>status</strong><br />
@@ -283,130 +314,53 @@ export let id;
             </div>
 
             <div class="row mb-2">
-                <div class="col text-center">
-                    {#if notLoading}
-                        <button
-                            on:click={gotoShopper}
-                            class="btn btn-success my-btn my-primary"
-                            >Start Ride</button
-                        >
-                    {:else}
-                        <button
-                            disabled
-                            class="btn btn-success my-btn my-primary"
-                            >Starting Ride...</button
-                        >
-                    {/if}
-                </div>
-            </div>
-        {:else if order.current_status == EorderStatus.GOTO_SHOPPER}
-            <div>
-                <small>Shopper Address</small>
-                <span class="distance p-1 ml-2 float-end text-center"
-                    >{distance.toFixed(2)}km</span
-                >
-            </div>
-            <div class="row">
-                <div class="col-10">
-                    <div>
-                        <strong
-                            >{order.shopper.first_name +
-                                " " +
-                                order.shopper.last_name}</strong
-                        >
-                    </div>
-                    <div class="row">
-                        <div class="col-1 padded">
-                            <span class="order-status-delivery mr-2" />
-                        </div>
-                        <div class="col-11">{order.shopper_address}</div>
-                    </div>
-                </div>
-                <div class="col-2">
-                    <a href="tel:{order.shopper.phone}"
-                        ><span class="fa fa-phone" /></a
+              {#if activePackage.currentStatus == 'ACCEPTED'}
+              <div class="col text-center">
+                {#if notLoading}
+                    <button
+                        on:click={()=>{startRide(activePackage)}}
+                        class="btn btn-success my-btn my-primary"
+                        >Start Ride</button
                     >
-                </div>
-            </div>
-            <div>
-                <small>Contact Info</small>
-            </div>
-            <div>
-                <strong>{order.shopper.phone}</strong>
-            </div>
-            <div class="mt-2">
-                <button on:click="{terminateOrder}" class="btn btn-secondary float-end"
-                    >request another dispatcher</button
-                >
-            </div>
-
-            <div class="mt-3">
-               {#if notLoading}
-               <button on:click="{gotoRetailer}" style="width: 100%;" class="btn btn-block btn-success"
-               >Recieved from shopper</button
-           >
-               {:else}
-               <button disabled style="width: 100%;" class="btn btn-block btn-success"
-                    >Recieving from shopper...</button
-                >
-               {/if}
-            </div>
-        {:else if order.current_status ==  EorderStatus.GOTO_RETAILER}
-
-            <div>
-                <small>Retailer Address</small>
-                <span class="distance p-1 ml-2 float-end text-center"
-                    >{distance.toFixed(2)}km</span
-                >
-            </div>
-            <div class="row">
-                <div class="col-10">
-                    <div>
-                        <strong
-                            >{order.retailer.first_name +
-                                " " +
-                                order.retailer.last_name}</strong
-                        >
-                    </div>
-                    <div class="row">
-                        <div class="col-1 padded">
-                            <span class="order-status-delivery mr-2" />
-                        </div>
-                        <div class="col-11">{order.retailer_address}</div>
-                    </div>
-                </div>
-                <div class="col-2">
-                    <a href="tel:{order.retailer.phone}"
-                        ><span class="fa fa-phone" /></a
+                {:else}
+                    <button
+                        disabled
+                        class="btn btn-success my-btn my-primary"
+                        >Starting Ride...</button
                     >
-                </div>
+                {/if}
             </div>
-            <div>
-                <small>Contact Info</small>
+              {:else if  activePackage.currentStatus == 'IN_TRANSIT'}
+              <div class="col text-center">
+                {#if notLoading}
+                    <button
+                        on:click={startRide}
+                        class="btn btn-success my-btn my-primary"
+                        >Close Package</button
+                    >
+                {:else}
+                    <button
+                        disabled
+                        class="btn btn-success my-btn my-primary"
+                        >Starting Ride...</button
+                    >
+                {/if}
             </div>
-            <div>
-                <strong>{order.retailer.phone}</strong>
+            <div class="col text-center">
+                <button
+                class="btn btn-success my-btn my-primary"
+                >Request Rider</button
+            >
             </div>
-            <div class="mt-2">
-                <button on:click="{terminateOrder}" class="btn btn-secondary float-end"
-                    >request another dispatcher</button
-                >
+              {:else if activePackage.currentStatus == 'DELIVERED'}
+                 <!-- else content here -->
+              {/if}
             </div>
-
-            <div class="mt-3">
-               {#if notLoading}
-               <button on:click="{endOrder}" style="width: 100%;" class="btn btn-block btn-success"
-               >Complete Delivery</button
-           >
-               {:else}
-               <button disabled style="width: 100%;" class="btn btn-block btn-success"
-                    >completing Delivery...</button
-                >
-               {/if}
-            </div>
-        {/if}
-    </div>
+          
+         {/if}
+        </div>
 </main>
+<ProductsModal products={modalProducts}></ProductsModal>
 
 <style>
     small {

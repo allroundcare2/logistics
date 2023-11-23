@@ -22,7 +22,7 @@ export function registration_status(){
 }
 
 export function  getUrl(){
-   return location.hostname == 'localhost'? 'http://localhost:3000' : 'https://api.allroundcare.org';
+   return location.hostname == 'localhost'? 'http://localhost:3000' : 'https://live.allroundcare.org';
 }
 
 function deg2rad(deg: number) {

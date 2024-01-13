@@ -80,17 +80,20 @@ import { getUrl } from "../../functions/clientAuth";
                 >
                     <option disabled selected value="">pick Vechile type</option
                     >
-                    <option value={EvehicleType.BIKE}
-                        >{EvehicleType.BIKE}
+                    <option value={EvehicleType.OKODA}
+                        >{EvehicleType.OKODA}
                         </option
-                    >  <option value={EvehicleType.BUS}
-                    >{EvehicleType.BUS}</option
+                    >  <option value={EvehicleType.CAR}
+                    >{EvehicleType.CAR}</option
                 >
-                    <option value={EvehicleType.MINI_VAN}
-                    >{EvehicleType.MINI_VAN}</option
+                    <option value={EvehicleType.BICYCLE}
+                    >{EvehicleType.BICYCLE}</option
                 >
                     <option value={EvehicleType.TRICYCLE}
                     >{EvehicleType.TRICYCLE}</option
+                >
+                <option value={EvehicleType.VAN}
+                    >{EvehicleType.VAN}</option
                 >
                 </select>
             </div>

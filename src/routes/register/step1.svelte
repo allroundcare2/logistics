@@ -44,7 +44,7 @@
             } else {
                 let resp = await Swal.fire({
                     title: "user was not created. ",
-                    text: "something went wrong , we are aware of it and are on it. Please try again later",
+                    text: axiosData.data.msg == 'duplicate entry'? "either you entered an existing email or phone number": "something went wrong , we are aware of it and are on it. Please try again later",
                     icon: "error",
                     timer: 6000,
                 });
@@ -66,7 +66,9 @@
 
     
 </script>
-
+<svelte:head>
+    <title>ARC Logistics :: Registration step 1</title>
+</svelte:head>
 <div class="main">
     <div class="container">
         <RegisterNav step="1" />
@@ -128,7 +130,7 @@
                     type="tel"
                     class="form-control"
                     id="phone"
-                    placeholder="e.g +2348034564321"
+                    placeholder="e.g 08034564321"
                 />
             </div>
             <div class="form-group mt-3">

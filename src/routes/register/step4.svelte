@@ -39,6 +39,25 @@ import { getUrl } from "../../functions/clientAuth";
             }
         } catch (error) {}
     };
+    const banks  = [
+    {name: "Access Bank plc", shortname: "Access"},
+    {name: "Fidelity Bank Nigeria", shortname: "Fidelity"},
+    {name: "First Bank of Nigeria", shortname: "FirstBank"},
+    {name: "Guaranty Trust Holding Company PLC", shortname: "GTBank"},
+    {name: "Union Bank of Nigeria", shortname: "Union"},
+    {name: "United Bank for Africa", shortname: "UBA"},
+    {name: "Zenith Bank", shortname: "Zenith"},
+    {name: "Ecobank Nigeria", shortname: "Ecobank"},
+    {name: "Heritage Bank", shortname: "Heritage"},
+    {name: "Keystone Bank Limited", shortname: "Keystone"},
+    {name: "Polaris Bank Limited", shortname: "Polaris"},
+    {name: "Standard Chartered", shortname: "StandardChartered"},
+    {name: "First City Monument Bank Limited", shortname: "FCMB"},
+    {name: "Citibank Nigeria Limited", shortname: "Citibank"},
+    {name: "Optimus Bank Limited", shortname: "Optimus"},
+    {name: "Stanbic IBTC Bank Plc", shortname: "StanbicIBTC"}
+];
+
 </script>
 
 <div class="main">
@@ -81,10 +100,11 @@ import { getUrl } from "../../functions/clientAuth";
                     id="bnk"
                 >
                     <option disabled selected value="">pick your bank</option>
-                    <option value="access">Access Bank</option>
-                    <option value="gtb">Guarantee Trust Bank</option>
-                    <option value="union">Union Bank</option>
-                    <option value="UBA">United Bank of Africa</option>
+                   {#each banks as bank}
+                   <option value="{bank.shortname}">{bank.name}</option>
+                   {/each}
+                    
+                    
                 </select>
             </div>
 

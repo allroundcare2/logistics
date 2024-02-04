@@ -94,6 +94,7 @@ import { getUrl } from "../../functions/clientAuth";
                 >
                 </select>
             </div>
+            {#if vehicle.vehicle_type !=  EvehicleType.BIKE}
             <div class="form-group mt-3">
                 <label for="plate">License plate</label>
                 <input
@@ -116,6 +117,7 @@ import { getUrl } from "../../functions/clientAuth";
                     placeholder="e.g, BG 336 CB"
                 />
             </div>
+            {/if}
 
             <div class="mt-5">
                 <button type="submit" class="btn btn-full but">Next</button>

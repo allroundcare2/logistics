@@ -97,7 +97,7 @@ import { getUrl } from "../../functions/clientAuth";
                 >
                 </select>
             </div>
-            {#if vehicle.vehicle_type !=  EvehicleType.BIKE}
+            {#if vehicle.vehicle_type !=  EvehicleType.BICYCLE}
             <div class="form-group mt-3">
                 <label for="plate">License plate</label>
                 <input

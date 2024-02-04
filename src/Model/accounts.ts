@@ -4,10 +4,11 @@ export enum EuserType {
 }
 
 export enum EvehicleType {
-    BIKE = 'motorcycle',
-    MINI_VAN = 'minivan',
-    BUS = "bus",
-    TRICYCLE = 'tricycle'
+    BICYCLE = 'bicycle',
+    OKODA = 'okada',
+    CAR ='car',
+    VAN ='van',
+    TRICYCLE ='tricycle'
 
 }
 export interface Ivehicle {
@@ -86,6 +87,8 @@ export interface Ilocation {
     longitude: number;
 }
 export interface Iorder {
+    delivery_type?: any;
+    packages?: any;
     _id?: any;
     dispatcher_id?: number;
     shopper_id?: number;
